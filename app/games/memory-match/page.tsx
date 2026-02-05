@@ -1,5 +1,11 @@
+import BackButton from "../../components/BackButton";
 import MemoryMatch from "./component";
 
 export default function Page() {
-  return <MemoryMatch />;
+  return (
+    <>
+      <BackButton />
+      <MemoryMatch />
+    </>
+  );
 }

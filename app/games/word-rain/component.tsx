@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { wordRainWords } from "@/app/data/wordRain";
 
 interface FallingWord {
   id: number;
@@ -8,49 +9,8 @@ interface FallingWord {
   x: number;
   y: number;
   speed: number;
+  counted: boolean; // Track if this word has already deducted a life
 }
-
-const WORDS = [
-  "code",
-  "debug",
-  "type",
-  "rain",
-  "cloud",
-  "storm",
-  "thunder",
-  "lightning",
-  "keyboard",
-  "screen",
-  "mouse",
-  "click",
-  "scroll",
-  "page",
-  "web",
-  "site",
-  "javascript",
-  "python",
-  "html",
-  "css",
-  "react",
-  "node",
-  "server",
-  "client",
-  "function",
-  "variable",
-  "loop",
-  "array",
-  "object",
-  "string",
-  "number",
-  "hello",
-  "world",
-  "game",
-  "play",
-  "score",
-  "level",
-  "life",
-  "heart",
-];
 
 export default function WordRainGame() {
   const [score, setScore] = useState(0);
@@ -64,19 +24,8 @@ export default function WordRainGame() {
     easy: number;
     medium: number;
     hard: number;
-  }>(() => {
-    if (typeof window === "undefined") return { easy: 0, medium: 0, hard: 0 };
-    const saved = localStorage.getItem("wordRainHighScores");
-    if (saved) {
-      try {
-        return JSON.parse(saved);
-      } catch {
-        // ignore
-      }
-    }
-    return { easy: 0, medium: 0, hard: 0 };
-  });
-  const [stars] = useState<
+  }>({ easy: 0, medium: 0, hard: 0 });
+  const [stars, setStars] = useState<
     {
       width: string;
       height: string;
@@ -84,49 +33,42 @@ export default function WordRainGame() {
       top: string;
       animationDelay: string;
     }[]
-  >(() => {
-    if (typeof window === "undefined") return [];
-    return Array.from({ length: 100 }).map(() => ({
-      width: `${Math.random() * 3 + 1}px`,
-      height: `${Math.random() * 3 + 1}px`,
-      left: `${Math.random() * 100}%`,
-      top: `${Math.random() * 100}%`,
-      animationDelay: `${Math.random() * 2}s`,
-    }));
-  });
+  >([]);
   const wordIdRef = useRef(0);
   const inputRef = useRef<HTMLInputElement>(null);
+  const countedWordsRef = useRef<Set<number>>(new Set());
 
   const difficultySettings = useMemo(
     () =>
       ({
         easy: {
           label: "Easy",
-          spawnMs: 2200,
-          speedBase: 0.4,
-          speedRand: 0.4,
-          maxWords: 6,
+          spawnMs: 2500,
+          speedBase: 0.8,
+          speedRand: 0.3,
+          maxWords: 5,
         },
         medium: {
           label: "Medium",
-          spawnMs: 1400,
-          speedBase: 0.7,
-          speedRand: 0.7,
-          maxWords: 10,
+          spawnMs: 1800,
+          speedBase: 0.8,
+          speedRand: 0.3,
+          maxWords: 8,
         },
         hard: {
           label: "Hard",
-          spawnMs: 900,
-          speedBase: 1.1,
-          speedRand: 1.0,
-          maxWords: 16,
+          spawnMs: 1200,
+          speedBase: 0.8,
+          speedRand: 0.3,
+          maxWords: 12,
         },
       }) as const,
     [],
   );
 
   const spawnWord = useCallback(() => {
-    const word = WORDS[Math.floor(Math.random() * WORDS.length)];
+    const wordList = wordRainWords[difficulty];
+    const word = wordList[Math.floor(Math.random() * wordList.length)];
     const newWord: FallingWord = {
       id: wordIdRef.current++,
       word,
@@ -135,6 +77,7 @@ export default function WordRainGame() {
       speed:
         difficultySettings[difficulty].speedBase +
         Math.random() * difficultySettings[difficulty].speedRand,
+      counted: false,
     };
     setWords((prev) =>
       prev.length >= difficultySettings[difficulty].maxWords ? prev : [...prev, newWord],
@@ -148,6 +91,7 @@ export default function WordRainGame() {
     setInput("");
     setGameOver(false);
     setIsPlaying(true);
+    countedWordsRef.current.clear(); // Clear counted words on new game
     setTimeout(() => {
       inputRef.current?.focus();
     }, 0);
@@ -175,12 +119,23 @@ export default function WordRainGame() {
 
     const interval = setInterval(() => {
       setWords((prev) => {
+        // First, update positions
         const updated = prev.map((w) => ({ ...w, y: w.y + w.speed }));
-        const fallen = updated.filter((w) => w.y > window.innerHeight - 150);
 
-        if (fallen.length > 0) {
+        // Find words that have crossed the threshold AND haven't been counted yet (using ref)
+        const newlyFallen = updated.filter(
+          (w) => w.y > window.innerHeight - 150 && !countedWordsRef.current.has(w.id),
+        );
+
+        // Mark these words as counted in the ref (synchronously, no state delay)
+        for (const w of newlyFallen) {
+          countedWordsRef.current.add(w.id);
+        }
+
+        // Deduct one life per newly fallen word
+        if (newlyFallen.length > 0) {
           setLives((l) => {
-            const newLives = l - fallen.length;
+            const newLives = l - newlyFallen.length;
             if (newLives <= 0) {
               setIsPlaying(false);
               setGameOver(true);
@@ -189,6 +144,7 @@ export default function WordRainGame() {
           });
         }
 
+        // Filter out words that have fallen
         return updated.filter((w) => w.y <= window.innerHeight - 150);
       });
     }, 16);
@@ -202,6 +158,31 @@ export default function WordRainGame() {
     const interval = setInterval(spawnWord, difficultySettings[difficulty].spawnMs);
     return () => clearInterval(interval);
   }, [isPlaying, spawnWord, difficulty, difficultySettings]);
+
+  // Generate stars on client-side only to avoid hydration mismatch
+  useEffect(() => {
+    setStars(
+      Array.from({ length: 100 }).map(() => ({
+        width: `${Math.random() * 3 + 1}px`,
+        height: `${Math.random() * 3 + 1}px`,
+        left: `${Math.random() * 100}%`,
+        top: `${Math.random() * 100}%`,
+        animationDelay: `${Math.random() * 2}s`,
+      })),
+    );
+  }, []);
+
+  // Load high scores from localStorage on client-side only to avoid hydration mismatch
+  useEffect(() => {
+    const saved = localStorage.getItem("wordRainHighScores");
+    if (saved) {
+      try {
+        setHighScores(JSON.parse(saved));
+      } catch {
+        // ignore
+      }
+    }
+  }, []);
 
   // Save high score to localStorage when game ends
   useEffect(() => {

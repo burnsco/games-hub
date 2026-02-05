@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 interface Card {
   id: number;
@@ -31,12 +31,17 @@ const generateInitialCards = () => {
 };
 
 export default function MemoryMatchGame() {
-  const [cards, setCards] = useState<Card[]>(generateInitialCards);
+  const [cards, setCards] = useState<Card[]>([]);
   const [flippedIds, setFlippedIds] = useState<number[]>([]);
   const [moves, setMoves] = useState(0);
   const [pairs, setPairs] = useState(0);
   const [canFlip, setCanFlip] = useState(true);
   const [gameWon, setGameWon] = useState(false);
+
+  // Generate shuffled cards on client-side only to avoid hydration mismatch
+  useEffect(() => {
+    setCards(generateInitialCards());
+  }, []);
 
   const initGame = () => {
     setCards(generateInitialCards());
