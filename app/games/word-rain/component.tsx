@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 interface FallingWord {
   id: number;
@@ -60,22 +60,70 @@ export default function WordRainGame() {
   const [words, setWords] = useState<FallingWord[]>([]);
   const [input, setInput] = useState("");
   const [difficulty, setDifficulty] = useState<"easy" | "medium" | "hard">("medium");
-  const [highScores, setHighScores] = useState({
-    easy: 0,
-    medium: 0,
-    hard: 0,
+  const [highScores, setHighScores] = useState<{
+    easy: number;
+    medium: number;
+    hard: number;
+  }>(() => {
+    if (typeof window === "undefined") return { easy: 0, medium: 0, hard: 0 };
+    const saved = localStorage.getItem("wordRainHighScores");
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch {
+        // ignore
+      }
+    }
+    return { easy: 0, medium: 0, hard: 0 };
   });
-  const [stars, setStars] = useState<
-    { width: string; height: string; left: string; top: string; animationDelay: string }[]
-  >([]);
+  const [stars] = useState<
+    {
+      width: string;
+      height: string;
+      left: string;
+      top: string;
+      animationDelay: string;
+    }[]
+  >(() => {
+    if (typeof window === "undefined") return [];
+    return Array.from({ length: 100 }).map(() => ({
+      width: `${Math.random() * 3 + 1}px`,
+      height: `${Math.random() * 3 + 1}px`,
+      left: `${Math.random() * 100}%`,
+      top: `${Math.random() * 100}%`,
+      animationDelay: `${Math.random() * 2}s`,
+    }));
+  });
   const wordIdRef = useRef(0);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const difficultySettings = {
-    easy: { label: "Easy", spawnMs: 2200, speedBase: 0.4, speedRand: 0.4, maxWords: 6 },
-    medium: { label: "Medium", spawnMs: 1400, speedBase: 0.7, speedRand: 0.7, maxWords: 10 },
-    hard: { label: "Hard", spawnMs: 900, speedBase: 1.1, speedRand: 1.0, maxWords: 16 },
-  } as const;
+  const difficultySettings = useMemo(
+    () =>
+      ({
+        easy: {
+          label: "Easy",
+          spawnMs: 2200,
+          speedBase: 0.4,
+          speedRand: 0.4,
+          maxWords: 6,
+        },
+        medium: {
+          label: "Medium",
+          spawnMs: 1400,
+          speedBase: 0.7,
+          speedRand: 0.7,
+          maxWords: 10,
+        },
+        hard: {
+          label: "Hard",
+          spawnMs: 900,
+          speedBase: 1.1,
+          speedRand: 1.0,
+          maxWords: 16,
+        },
+      }) as const,
+    [],
+  );
 
   const spawnWord = useCallback(() => {
     const word = WORDS[Math.floor(Math.random() * WORDS.length)];
@@ -155,32 +203,10 @@ export default function WordRainGame() {
     return () => clearInterval(interval);
   }, [isPlaying, spawnWord, difficulty, difficultySettings]);
 
-  // Generate stars on client only to avoid hydration mismatch
-  useEffect(() => {
-    const nextStars = Array.from({ length: 100 }).map(() => ({
-      width: `${Math.random() * 3 + 1}px`,
-      height: `${Math.random() * 3 + 1}px`,
-      left: `${Math.random() * 100}%`,
-      top: `${Math.random() * 100}%`,
-      animationDelay: `${Math.random() * 2}s`,
-    }));
-    setStars(nextStars);
-  }, []);
-
-  useEffect(() => {
-    const saved = localStorage.getItem("wordRainHighScores");
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved) as { easy: number; medium: number; hard: number };
-        setHighScores((prev) => ({ ...prev, ...parsed }));
-      } catch {
-        // ignore
-      }
-    }
-  }, []);
-
+  // Save high score to localStorage when game ends
   useEffect(() => {
     if (!gameOver) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setHighScores((prev) => {
       const best = Math.max(prev[difficulty], score);
       const next = { ...prev, [difficulty]: best };
@@ -190,24 +216,26 @@ export default function WordRainGame() {
   }, [gameOver, score, difficulty]);
 
   return (
-    <div className="relative w-full h-screen bg-gradient-to-b from-slate-900 via-indigo-950 to-slate-900 overflow-hidden">
+    <div className="relative h-screen w-full overflow-hidden bg-linear-to-b from-slate-900 via-indigo-950 to-slate-900">
       {/* Stars */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {stars.map((star, i) => (
+      <div className="pointer-events-none absolute inset-0 overflow-hidden">
+        {stars.map((star) => (
           <div
-            key={i}
-            className="absolute bg-white rounded-full animate-pulse"
+            key={`star-${star.left}-${star.top}`}
+            className="absolute animate-pulse rounded-full bg-white"
             style={star}
           />
         ))}
       </div>
 
       {/* Lives */}
-      <div className="absolute top-4 right-4 flex gap-2 z-20">
+      <div className="absolute right-4 top-4 z-20 flex gap-2">
         {[0, 1, 2].map((i) => (
           <span
             key={i}
-            className={`text-3xl transition-all ${i >= lives ? "grayscale opacity-30 scale-75" : ""}`}
+            className={`text-3xl transition-all ${
+              i >= lives ? "scale-75 opacity-30 grayscale" : ""
+            }`}
           >
             ❤️
           </span>
@@ -215,18 +243,18 @@ export default function WordRainGame() {
       </div>
 
       {/* Score */}
-      <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 text-center">
-        <div className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-b from-cyan-400 to-blue-600">
+      <div className="absolute left-1/2 top-4 z-20 -translate-x-1/2 text-center">
+        <div className="bg-linear-to-b from-cyan-400 to-blue-600 bg-clip-text text-4xl font-black text-transparent">
           {score}
         </div>
-        <div className="text-sm text-slate-400 uppercase tracking-widest">Score</div>
+        <div className="text-sm uppercase tracking-widest text-slate-400">Score</div>
       </div>
 
       {/* Falling Words */}
       {words.map((w) => (
         <div
           key={w.id}
-          className="absolute text-2xl font-bold text-white font-mono"
+          className="absolute font-mono text-2xl font-bold text-white"
           style={{
             left: w.x,
             top: w.y,
@@ -239,15 +267,15 @@ export default function WordRainGame() {
 
       {/* Input */}
       {isPlaying && (
-        <div className="absolute bottom-0 left-0 right-0 p-6 z-20">
-          <div className="max-w-xl mx-auto">
+        <div className="absolute bottom-0 left-0 right-0 z-20 p-6">
+          <div className="mx-auto max-w-xl">
             <input
               ref={inputRef}
               type="text"
               value={input}
               onChange={(e) => handleInput(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && setInput("")}
-              className="w-full bg-white/10 backdrop-blur-md border-2 border-cyan-400/50 rounded-xl px-6 py-4 text-2xl text-white text-center font-mono focus:outline-none focus:border-cyan-400 focus:ring-4 focus:ring-cyan-400/20 placeholder:text-slate-500"
+              className="w-full rounded-xl border-2 border-cyan-400/50 bg-white/10 px-6 py-4 text-center font-mono text-2xl text-white backdrop-blur-md placeholder:text-slate-500 focus:border-cyan-400 focus:outline-none focus:ring-4 focus:ring-cyan-400/20"
               placeholder="Type here..."
               autoComplete="off"
             />
@@ -257,24 +285,25 @@ export default function WordRainGame() {
 
       {/* Start/Game Over Screen */}
       {(!isPlaying || gameOver) && (
-        <div className="absolute inset-0 flex items-center justify-center z-30 bg-slate-900/90 backdrop-blur-sm">
-          <div className="text-center bg-white/5 border border-white/10 rounded-2xl p-8 backdrop-blur-md w-[360px]">
-            <h1 className="text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500 mb-4">
+        <div className="absolute inset-0 z-30 flex items-center justify-center bg-slate-900/90 backdrop-blur-sm">
+          <div className="w-90 rounded-2xl border border-white/10 bg-white/5 p-8 text-center backdrop-blur-md">
+            <h1 className="mb-4 bg-linear-to-r from-cyan-400 to-blue-500 bg-clip-text text-6xl font-black text-transparent">
               {gameOver ? "Game Over!" : "🌧️ WordRain"}
             </h1>
-            {gameOver && <p className="text-6xl font-black text-white mb-8">{score}</p>}
-            <p className="text-slate-400 text-lg mb-6">
+            {gameOver && <p className="mb-8 text-6xl font-black text-white">{score}</p>}
+            <p className="mb-6 text-lg text-slate-400">
               {gameOver ? "Final Score" : "Type the words before they fall!"}
             </p>
 
-            <div className="flex items-center justify-center gap-2 mb-6">
+            <div className="mb-6 flex items-center justify-center gap-2">
               {(["easy", "medium", "hard"] as const).map((level) => {
                 const active = difficulty === level;
                 return (
                   <button
+                    type="button"
                     key={level}
                     onClick={() => setDifficulty(level)}
-                    className={`px-3 py-2 rounded-lg text-sm font-semibold transition-all ${
+                    className={`rounded-lg px-3 py-2 text-sm font-semibold transition-all ${
                       active
                         ? "bg-cyan-400 text-slate-900 shadow-md"
                         : "bg-white/10 text-slate-200 hover:bg-white/20"
@@ -286,8 +315,8 @@ export default function WordRainGame() {
               })}
             </div>
 
-            <div className="bg-white/10 border border-white/10 rounded-xl p-3 text-sm text-slate-200 mb-6 text-left">
-              <div className="text-xs uppercase tracking-wider text-slate-400 mb-2">
+            <div className="mb-6 rounded-xl border border-white/10 bg-white/10 p-3 text-left text-sm text-slate-200">
+              <div className="mb-2 text-xs uppercase tracking-wider text-slate-400">
                 High Scores
               </div>
               <div className="flex justify-between">
@@ -305,8 +334,9 @@ export default function WordRainGame() {
             </div>
 
             <button
+              type="button"
               onClick={startGame}
-              className="bg-gradient-to-r from-cyan-500 to-blue-600 text-white px-12 py-4 rounded-full text-2xl font-bold hover:scale-105 active:scale-95 transition-all shadow-lg"
+              className="rounded-full bg-linear-to-r from-cyan-500 to-blue-600 px-12 py-4 text-2xl font-bold text-white shadow-lg transition-all hover:scale-105 active:scale-95"
             >
               {gameOver ? "Play Again" : "Start Game"}
             </button>

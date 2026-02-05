@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 const PADDLE_WIDTH = 10;
 const PADDLE_HEIGHT = 80;
@@ -18,12 +18,15 @@ export default function PongGame() {
   const [result, setResult] = useState<"win" | "lose" | null>(null);
   const keysRef = useRef<{ [key: string]: boolean }>({});
 
-  const resetBall = () => ({
-    x: 300,
-    y: 200,
-    speedX: (Math.random() > 0.5 ? 1 : -1) * 5,
-    speedY: (Math.random() - 0.5) * 6,
-  });
+  const resetBall = useCallback(
+    () => ({
+      x: 300,
+      y: 200,
+      speedX: (Math.random() > 0.5 ? 1 : -1) * 5,
+      speedY: (Math.random() - 0.5) * 6,
+    }),
+    [],
+  );
 
   const startGame = () => {
     setPlayerY(200 - PADDLE_HEIGHT / 2);
@@ -60,10 +63,10 @@ export default function PongGame() {
       if (!canvas) return;
 
       // Player movement
-      if (keysRef.current["ArrowUp"] || keysRef.current["w"] || keysRef.current["W"]) {
+      if (keysRef.current.ArrowUp || keysRef.current.w || keysRef.current.W) {
         setPlayerY((y) => Math.max(0, y - 8));
       }
-      if (keysRef.current["ArrowDown"] || keysRef.current["s"] || keysRef.current["S"]) {
+      if (keysRef.current.ArrowDown || keysRef.current.s || keysRef.current.S) {
         setPlayerY((y) => Math.min(canvas.height - PADDLE_HEIGHT, y + 8));
       }
 
@@ -136,7 +139,7 @@ export default function PongGame() {
     }, 16);
 
     return () => clearInterval(interval);
-  }, [isPlaying, playerY, aiY]);
+  }, [isPlaying, playerY, aiY, resetBall]);
 
   // Draw
   useEffect(() => {
@@ -182,9 +185,9 @@ export default function PongGame() {
   }, [playerY, aiY, ball]);
 
   return (
-    <div className="relative w-full h-screen bg-gradient-to-br from-slate-900 via-gray-900 to-slate-800 flex items-center justify-center">
+    <div className="relative flex h-screen w-full items-center justify-center bg-linear-to-br from-slate-900 via-gray-900 to-slate-800">
       {/* Scores */}
-      <div className="absolute top-4 left-1/2 -translate-x-1/2 flex gap-16 text-center z-20">
+      <div className="absolute left-1/2 top-4 z-20 flex -translate-x-1/2 gap-16 text-center">
         <div>
           <div className="text-4xl font-bold text-cyan-400">{playerScore}</div>
           <div className="text-sm text-slate-400">You</div>
@@ -196,7 +199,7 @@ export default function PongGame() {
       </div>
 
       <div className="text-center">
-        <h1 className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500 mb-6">
+        <h1 className="mb-6 bg-linear-to-r from-cyan-400 to-blue-500 bg-clip-text text-4xl font-black text-transparent">
           🏓 Pong
         </h1>
 
@@ -204,14 +207,15 @@ export default function PongGame() {
           ref={canvasRef}
           width={600}
           height={400}
-          className="border-4 border-cyan-500/50 rounded-2xl shadow-2xl"
+          className="rounded-2xl border-4 border-cyan-500/50 shadow-2xl"
         />
 
-        <p className="text-slate-400 mt-4">Use Arrow Keys ↑↓ or W/S to move your paddle</p>
+        <p className="mt-4 text-slate-400">Use Arrow Keys ↑↓ or W/S to move your paddle</p>
 
         <button
+          type="button"
           onClick={startGame}
-          className="mt-6 bg-gradient-to-r from-cyan-500 to-blue-500 text-white px-8 py-3 rounded-full text-xl font-bold hover:scale-105 active:scale-95 transition-all shadow-lg"
+          className="mt-6 rounded-full bg-linear-to-r from-cyan-500 to-blue-500 px-8 py-3 text-xl font-bold text-white shadow-lg transition-all hover:scale-105 active:scale-95"
         >
           {isPlaying ? "Restart" : "Start Game"}
         </button>
@@ -219,19 +223,20 @@ export default function PongGame() {
 
       {/* Result */}
       {result && (
-        <div className="fixed inset-0 flex items-center justify-center z-30 bg-slate-900/90 backdrop-blur-sm">
+        <div className="fixed inset-0 z-30 flex items-center justify-center bg-slate-900/90 backdrop-blur-sm">
           <div className="text-center">
             <h1
-              className={`text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r ${result === "win" ? "from-green-400 to-emerald-500" : "from-red-400 to-orange-500"} mb-4`}
+              className={`bg-linear-to-r bg-clip-text text-6xl font-black text-transparent ${result === "win" ? "from-green-400 to-emerald-500" : "from-red-400 to-orange-500"} mb-4`}
             >
               {result === "win" ? "🎉 You Win!" : "😔 You Lose!"}
             </h1>
-            <p className="text-slate-400 text-2xl mb-8">
+            <p className="mb-8 text-2xl text-slate-400">
               Final Score: {playerScore} - {aiScore}
             </p>
             <button
+              type="button"
               onClick={startGame}
-              className="bg-gradient-to-r from-cyan-500 to-blue-500 text-white px-12 py-4 rounded-full text-2xl font-bold hover:scale-105 active:scale-95 transition-all shadow-lg"
+              className="rounded-full bg-linear-to-r from-cyan-500 to-blue-500 px-12 py-4 text-2xl font-bold text-white shadow-lg transition-all hover:scale-105 active:scale-95"
             >
               Play Again
             </button>

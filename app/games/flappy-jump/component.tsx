@@ -20,14 +20,13 @@ export default function FlappyJumpGame() {
   const [birdVelocity, setBirdVelocity] = useState(0);
   const [pipes, setPipes] = useState<Pipe[]>([]);
   const [score, setScore] = useState(0);
-  const [bestScore, setBestScore] = useState(0);
+  const [bestScore, setBestScore] = useState(() => {
+    const saved = typeof window !== "undefined" ? localStorage.getItem("flappyBestScore") : null;
+    return saved ? parseInt(saved, 10) : 0;
+  });
+
   const [isPlaying, setIsPlaying] = useState(false);
   const [gameOver, setGameOver] = useState(false);
-
-  useEffect(() => {
-    const saved = localStorage.getItem("flappyBestScore");
-    if (saved) setBestScore(parseInt(saved));
-  }, []);
 
   const createPipe = useCallback(() => {
     const canvas = canvasRef.current;
@@ -137,7 +136,7 @@ export default function FlappyJumpGame() {
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isPlaying]);
+  });
 
   // Draw
   useEffect(() => {
@@ -200,34 +199,37 @@ export default function FlappyJumpGame() {
   }, [birdY, pipes]);
 
   return (
-    <div
-      className="relative w-full h-screen bg-gradient-to-b from-sky-400 via-sky-300 to-sky-200 flex items-center justify-center"
+    <button
+      type="button"
+      className="relative flex h-screen w-full items-center justify-center bg-linear-to-b from-sky-400 via-sky-300 to-sky-200"
       onClick={jump}
+      onKeyDown={(e) => (e.key === " " || e.key === "Enter") && jump()}
     >
       {/* Score */}
-      <div className="absolute top-4 right-4 text-right z-20">
+      <div className="absolute right-4 top-4 z-20 text-right">
         <div className="text-4xl font-bold text-white drop-shadow-lg">{score}</div>
         <div className="text-lg text-sky-800">Best: {bestScore}</div>
       </div>
 
       <div className="text-center">
-        <h1 className="text-4xl font-black text-white drop-shadow-lg mb-6">🐦 Flappy Jump</h1>
+        <h1 className="mb-6 text-4xl font-black text-white drop-shadow-lg">🐦 Flappy Jump</h1>
 
         <canvas
           ref={canvasRef}
           width={400}
           height={500}
-          className="border-4 border-white/50 rounded-2xl shadow-2xl"
+          className="rounded-2xl border-4 border-white/50 shadow-2xl"
         />
 
-        <p className="text-sky-800 mt-4 font-medium">Press SPACE or Click to jump!</p>
+        <p className="mt-4 font-medium text-sky-800">Press SPACE or Click to jump!</p>
 
         <button
+          type="button"
           onClick={(e) => {
             e.stopPropagation();
             startGame();
           }}
-          className="mt-6 bg-gradient-to-r from-yellow-400 to-orange-400 text-white px-8 py-3 rounded-full text-xl font-bold hover:scale-105 active:scale-95 transition-all shadow-lg border-2 border-white/50"
+          className="mt-6 rounded-full border-2 border-white/50 bg-linear-to-r from-yellow-400 to-orange-400 px-8 py-3 text-xl font-bold text-white shadow-lg transition-all hover:scale-105 active:scale-95"
         >
           {isPlaying ? "Restart" : "Start Game"}
         </button>
@@ -235,23 +237,24 @@ export default function FlappyJumpGame() {
 
       {/* Game Over */}
       {gameOver && (
-        <div className="fixed inset-0 flex items-center justify-center z-30 bg-sky-900/80 backdrop-blur-sm">
+        <div className="fixed inset-0 z-30 flex items-center justify-center bg-sky-900/80 backdrop-blur-sm">
           <div className="text-center">
-            <h1 className="text-6xl font-black text-white mb-4">Game Over!</h1>
-            <p className="text-sky-200 text-2xl mb-2">Score</p>
-            <p className="text-6xl font-black text-yellow-400 mb-8">{score}</p>
+            <h1 className="mb-4 text-6xl font-black text-white">Game Over!</h1>
+            <p className="mb-2 text-2xl text-sky-200">Score</p>
+            <p className="mb-8 text-6xl font-black text-yellow-400">{score}</p>
             <button
+              type="button"
               onClick={(e) => {
                 e.stopPropagation();
                 startGame();
               }}
-              className="bg-gradient-to-r from-yellow-400 to-orange-400 text-white px-12 py-4 rounded-full text-2xl font-bold hover:scale-105 active:scale-95 transition-all shadow-lg border-2 border-white/50"
+              className="rounded-full border-2 border-white/50 bg-linear-to-r from-yellow-400 to-orange-400 px-12 py-4 text-2xl font-bold text-white shadow-lg transition-all hover:scale-105 active:scale-95"
             >
               Try Again
             </button>
           </div>
         </div>
       )}
-    </div>
+    </button>
   );
 }

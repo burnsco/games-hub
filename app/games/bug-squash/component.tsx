@@ -23,9 +23,9 @@ export default function BugSquashGame() {
   const containerRef = useRef<HTMLDivElement>(null);
   const bugIdRef = useRef(0);
 
-  const bugEmojis = ["🪲", "🐛", "🐜", "🪳", "🦗", "🕷️"];
-
   const createBug = useCallback(() => {
+    const bugEmojis = ["🪲", "🐛", "🐜", "🪳", "🦗", "🕷️"];
+
     if (!containerRef.current) return;
     const rect = containerRef.current.getBoundingClientRect();
 
@@ -69,9 +69,7 @@ export default function BugSquashGame() {
 
   const squashBug = (id: number) => {
     setBugs((prev) =>
-      prev.map((b) =>
-        b.id === id ? { ...b, squashed: true, squashedAt: Date.now() } : b,
-      ),
+      prev.map((b) => (b.id === id ? { ...b, squashed: true, squashedAt: Date.now() } : b)),
     );
     setScore((prev) => prev + 1);
     playSquashSound();
@@ -143,9 +141,7 @@ export default function BugSquashGame() {
     if (!isPlaying) return;
     const interval = setInterval(() => {
       const now = Date.now();
-      setBugs((prev) =>
-        prev.filter((b) => !b.squashedAt || now - b.squashedAt < 450),
-      );
+      setBugs((prev) => prev.filter((b) => !b.squashedAt || now - b.squashedAt < 450));
     }, 100);
     return () => clearInterval(interval);
   }, [isPlaying]);
@@ -154,8 +150,11 @@ export default function BugSquashGame() {
     try {
       const AudioContext =
         window.AudioContext ||
-        (window as unknown as { webkitAudioContext: typeof window.AudioContext })
-          .webkitAudioContext;
+        (
+          window as unknown as {
+            webkitAudioContext: typeof window.AudioContext;
+          }
+        ).webkitAudioContext;
       const ctx = new AudioContext();
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
@@ -178,20 +177,20 @@ export default function BugSquashGame() {
   return (
     <div
       ref={containerRef}
-      className="relative w-full h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 overflow-hidden"
+      className="bg-linear-to-br relative h-screen w-full overflow-hidden from-slate-900 via-slate-800 to-slate-900"
       style={{ cursor: isPlaying ? "crosshair" : "default" }}
     >
       {/* Background glow */}
-      <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-blue-600/10 rounded-full blur-[120px] animate-pulse" />
-      <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-violet-600/10 rounded-full blur-[120px] animate-pulse" />
+      <div className="absolute left-[-10%] top-[-10%] h-[50%] w-[50%] animate-pulse rounded-full bg-blue-600/10 blur-[120px]" />
+      <div className="absolute bottom-[-10%] right-[-10%] h-[50%] w-[50%] animate-pulse rounded-full bg-violet-600/10 blur-[120px]" />
 
       {/* Score */}
       {isPlaying && (
-        <div className="absolute top-8 left-1/2 -translate-x-1/2 text-center z-20">
-          <div className="text-8xl font-black text-transparent bg-clip-text bg-gradient-to-b from-blue-400 to-violet-600">
+        <div className="absolute left-1/2 top-8 z-20 -translate-x-1/2 text-center">
+          <div className="bg-linear-to-b from-blue-400 to-violet-600 bg-clip-text text-8xl font-black text-transparent">
             {score}
           </div>
-          <div className="text-xl text-slate-400 font-bold tracking-widest uppercase">
+          <div className="text-xl font-bold uppercase tracking-widest text-slate-400">
             Bugs Smashed
           </div>
         </div>
@@ -199,20 +198,21 @@ export default function BugSquashGame() {
 
       {/* Start Screen */}
       {!isPlaying && (
-        <div className="absolute inset-0 flex items-center justify-center z-30">
+        <div className="absolute inset-0 z-30 flex items-center justify-center">
           <div className="text-center">
             <button
+              type="button"
               onClick={startGame}
-              className="group relative bg-gradient-to-br from-red-500 to-orange-600 text-white w-64 h-64 rounded-full text-3xl font-black border-8 border-white/10 shadow-2xl hover:scale-110 active:scale-95 transition-all duration-300 flex flex-col items-center justify-center"
+              className="bg-linear-to-br group relative flex h-64 w-64 flex-col items-center justify-center rounded-full border-8 border-white/10 from-red-500 to-orange-600 text-3xl font-black text-white shadow-2xl transition-all duration-300 hover:scale-110 active:scale-95"
             >
-              <span className="text-6xl mb-2 group-hover:rotate-12 transition-transform">🪲</span>
+              <span className="mb-2 text-6xl transition-transform group-hover:rotate-12">🪲</span>
               <span>
                 DEBUG
                 <br />
                 NOW
               </span>
             </button>
-            <p className="text-slate-500 text-lg mt-8 font-mono">
+            <p className="mt-8 font-mono text-lg text-slate-500">
               The system is crawling with bugs.
               <br />
               Only YOU can fix it.
@@ -223,10 +223,11 @@ export default function BugSquashGame() {
 
       {/* Bugs */}
       {bugs.map((bug) => (
-        <div
+        <button
+          type="button"
           key={bug.id}
           onClick={() => squashBug(bug.id)}
-          className={`absolute cursor-pointer select-none transition-transform ${
+          className={`absolute cursor-pointer select-none border-0 bg-transparent p-0 transition-transform ${
             bug.squashed ? "scale-75" : "hover:scale-125"
           }`}
           style={{
@@ -235,6 +236,7 @@ export default function BugSquashGame() {
             fontSize: bug.size,
             transform: `rotate(${(Math.atan2(bug.targetY - bug.y, bug.targetX - bug.x) * 180) / Math.PI + 90}deg)`,
           }}
+          aria-label={`Bug ${bug.id}`}
         >
           <span
             className={`block transition-all duration-200 ${
@@ -249,14 +251,15 @@ export default function BugSquashGame() {
           >
             {bug.squashed ? "💥" : bug.emoji}
           </span>
-        </div>
+        </button>
       ))}
 
       {/* Stop Button */}
       {isPlaying && (
         <button
+          type="button"
           onClick={stopGame}
-          className="absolute bottom-8 left-1/2 -translate-x-1/2 bg-red-600 hover:bg-red-700 text-white px-12 py-6 rounded-full text-2xl font-black border-4 border-white shadow-2xl hover:scale-105 active:scale-95 transition-all z-20"
+          className="absolute bottom-8 left-1/2 z-20 -translate-x-1/2 rounded-full border-4 border-white bg-red-600 px-12 py-6 text-2xl font-black text-white shadow-2xl transition-all hover:scale-105 hover:bg-red-700 active:scale-95"
         >
           STOP GAME
         </button>

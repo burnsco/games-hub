@@ -1,4 +1,4 @@
-import WordRain from "../WordRain";
+import WordRain from "./component";
 
 export default function Page() {
   return <WordRain />;

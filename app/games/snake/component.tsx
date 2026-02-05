@@ -20,7 +20,11 @@ export default function SnakeGame() {
   const [food, setFood] = useState<Point>({ x: 15, y: 10 });
   const [direction, setDirection] = useState<Point>({ x: 1, y: 0 });
   const [score, setScore] = useState(0);
-  const [bestScore, setBestScore] = useState(0);
+  const [bestScore, setBestScore] = useState(() => {
+    if (typeof window === "undefined") return 0;
+    const saved = localStorage.getItem("snakeBestScore");
+    return saved ? parseInt(saved, 10) : 0;
+  });
   const [isPlaying, setIsPlaying] = useState(false);
   const [gameOver, setGameOver] = useState(false);
   const [gameSpeed, setGameSpeed] = useState(150);
@@ -29,11 +33,6 @@ export default function SnakeGame() {
   useEffect(() => {
     directionRef.current = direction;
   }, [direction]);
-
-  useEffect(() => {
-    const saved = localStorage.getItem("snakeBestScore");
-    if (saved) setBestScore(parseInt(saved));
-  }, []);
 
   const spawnFood = useCallback((currentSnake: Point[]) => {
     let newFood: Point;
@@ -208,15 +207,15 @@ export default function SnakeGame() {
   }, [snake, food]);
 
   return (
-    <div className="relative w-full h-screen bg-gradient-to-br from-green-900 via-emerald-900 to-slate-900 flex items-center justify-center">
+    <div className="relative flex h-screen w-full items-center justify-center bg-linear-to-br from-green-900 via-emerald-900 to-slate-900">
       {/* Score */}
-      <div className="absolute top-4 right-4 text-right z-20">
+      <div className="absolute right-4 top-4 z-20 text-right">
         <div className="text-3xl font-bold text-white">Score: {score}</div>
         <div className="text-lg text-slate-400">Best: {bestScore}</div>
       </div>
 
       <div className="text-center">
-        <h1 className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-500 mb-6">
+        <h1 className="mb-6 bg-linear-to-r from-green-400 to-emerald-500 bg-clip-text text-4xl font-black text-transparent">
           🐍 Snake
         </h1>
 
@@ -224,14 +223,15 @@ export default function SnakeGame() {
           ref={canvasRef}
           width={400}
           height={400}
-          className="border-4 border-green-500/50 rounded-2xl shadow-2xl"
+          className="rounded-2xl border-4 border-green-500/50 shadow-2xl"
         />
 
-        <p className="text-slate-400 mt-4">Use Arrow Keys or WASD to move</p>
+        <p className="mt-4 text-slate-400">Use Arrow Keys or WASD to move</p>
 
         <button
+          type="button"
           onClick={startGame}
-          className="mt-6 bg-gradient-to-r from-green-500 to-emerald-500 text-white px-8 py-3 rounded-full text-xl font-bold hover:scale-105 active:scale-95 transition-all shadow-lg"
+          className="mt-6 rounded-full bg-linear-to-r from-green-500 to-emerald-500 px-8 py-3 text-xl font-bold text-white shadow-lg transition-all hover:scale-105 active:scale-95"
         >
           {isPlaying ? "Restart" : "Start Game"}
         </button>
@@ -239,16 +239,17 @@ export default function SnakeGame() {
 
       {/* Game Over */}
       {gameOver && (
-        <div className="fixed inset-0 flex items-center justify-center z-30 bg-slate-900/90 backdrop-blur-sm">
+        <div className="fixed inset-0 z-30 flex items-center justify-center bg-slate-900/90 backdrop-blur-sm">
           <div className="text-center">
-            <h1 className="text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-red-400 to-orange-500 mb-4">
+            <h1 className="mb-4 bg-linear-to-r from-red-400 to-orange-500 bg-clip-text text-6xl font-black text-transparent">
               Game Over!
             </h1>
-            <p className="text-slate-400 text-2xl mb-2">Your Score</p>
-            <p className="text-6xl font-black text-white mb-8">{score}</p>
+            <p className="mb-2 text-2xl text-slate-400">Your Score</p>
+            <p className="mb-8 text-6xl font-black text-white">{score}</p>
             <button
+              type="button"
               onClick={startGame}
-              className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-12 py-4 rounded-full text-2xl font-bold hover:scale-105 active:scale-95 transition-all shadow-lg"
+              className="rounded-full bg-linear-to-r from-green-500 to-emerald-500 px-12 py-4 text-2xl font-bold text-white shadow-lg transition-all hover:scale-105 active:scale-95"
             >
               Play Again
             </button>

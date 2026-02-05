@@ -56,7 +56,7 @@ export default function ThemePicker() {
       <button
         ref={buttonRef}
         type="button"
-        className="flex items-center gap-2 rounded-xl glass hover:glass-hover transition-all justify-center"
+        className="glass hover:glass-hover flex items-center justify-center gap-2 rounded-xl transition-all"
         aria-label="Change theme"
       >
         <span className="text-xl">🎨</span>
@@ -64,10 +64,8 @@ export default function ThemePicker() {
 
       <div
         ref={dropdownRef}
-        className={`absolute top-full right-0 mt-2 w-48 p-2 rounded-xl bg-slate-950 border border-white/10 shadow-2xl transition-all duration-300 transform origin-top-right z-50 ${
-          open
-            ? "opacity-100 visible scale-100"
-            : "opacity-0 invisible scale-95"
+        className={`absolute right-0 top-full z-50 mt-2 w-48 origin-top-right transform rounded-xl border border-white/10 bg-slate-950 p-2 shadow-2xl transition-all duration-300 ${
+          open ? "visible scale-100 opacity-100" : "invisible scale-95 opacity-0"
         }`}
       >
         <div className="space-y-1">
@@ -75,11 +73,11 @@ export default function ThemePicker() {
             <button
               key={theme.id}
               type="button"
-              className="theme-option w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-sm font-medium text-left"
+              className="theme-option flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm font-medium transition-colors hover:bg-white/10"
               onClick={() => handleThemeSelect(theme.id)}
             >
               <span
-                className="w-4 h-4 rounded-full shadow-sm border border-white/20"
+                className="h-4 w-4 rounded-full border border-white/20 shadow-sm"
                 style={{ background: theme.color }}
               />
               <span className="text-slate-200">{theme.name}</span>

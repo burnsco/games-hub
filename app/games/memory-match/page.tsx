@@ -1,4 +1,4 @@
-import MemoryMatch from "../MemoryMatch";
+import MemoryMatch from "./component";
 
 export default function Page() {
   return <MemoryMatch />;

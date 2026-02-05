@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 interface Card {
   id: number;
@@ -11,43 +11,41 @@ interface Card {
 
 const EMOJIS = ["🎮", "🎲", "🎯", "🎪", "🎨", "🎭", "🎬", "🎤"];
 
+const shuffle = <T,>(array: T[]): T[] => {
+  const arr = [...array];
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+};
+
+const generateInitialCards = () => {
+  const gameEmojis = shuffle([...EMOJIS, ...EMOJIS]);
+  return gameEmojis.map((emoji, i) => ({
+    id: i,
+    emoji,
+    flipped: false,
+    matched: false,
+  }));
+};
+
 export default function MemoryMatchGame() {
-  const [cards, setCards] = useState<Card[]>([]);
+  const [cards, setCards] = useState<Card[]>(generateInitialCards);
   const [flippedIds, setFlippedIds] = useState<number[]>([]);
   const [moves, setMoves] = useState(0);
   const [pairs, setPairs] = useState(0);
   const [canFlip, setCanFlip] = useState(true);
   const [gameWon, setGameWon] = useState(false);
 
-  const shuffle = <T,>(array: T[]): T[] => {
-    const arr = [...array];
-    for (let i = arr.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [arr[i], arr[j]] = [arr[j], arr[i]];
-    }
-    return arr;
-  };
-
   const initGame = () => {
-    const gameEmojis = shuffle([...EMOJIS, ...EMOJIS]);
-    setCards(
-      gameEmojis.map((emoji, i) => ({
-        id: i,
-        emoji,
-        flipped: false,
-        matched: false,
-      })),
-    );
+    setCards(generateInitialCards());
     setFlippedIds([]);
     setMoves(0);
     setPairs(0);
     setCanFlip(true);
     setGameWon(false);
   };
-
-  useEffect(() => {
-    initGame();
-  }, []);
 
   const flipCard = (id: number) => {
     if (!canFlip) return;
@@ -64,10 +62,10 @@ export default function MemoryMatchGame() {
       setCanFlip(false);
 
       const [first, second] = newFlipped;
-      const card1 = cards.find((c) => c.id === first)!;
-      const card2 = cards.find((c) => c.id === second)!;
+      const card1 = cards.find((c) => c.id === first);
+      const card2 = cards.find((c) => c.id === second);
 
-      if (card1.emoji === card2.emoji) {
+      if (card1 && card2 && card1.emoji === card2.emoji) {
         // Match!
         setCards((prev) =>
           prev.map((c) => (c.id === first || c.id === second ? { ...c, matched: true } : c)),
@@ -93,31 +91,33 @@ export default function MemoryMatchGame() {
   };
 
   return (
-    <div className="relative w-full min-h-screen bg-gradient-to-br from-purple-900 via-indigo-900 to-slate-900 p-8">
+    <div className="relative min-h-screen w-full bg-linear-to-br from-purple-900 via-indigo-900 to-slate-900 p-8">
       {/* Stats */}
-      <div className="absolute top-4 right-4 text-right z-20">
+      <div className="absolute right-4 top-4 z-20 text-right">
         <div className="text-2xl font-bold text-white">Moves: {moves}</div>
         <div className="text-lg text-slate-400">Pairs: {pairs}/8</div>
       </div>
 
       {/* Game Container */}
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex min-h-screen items-center justify-center">
         <div className="text-center">
-          <h1 className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-500 mb-8">
+          <h1 className="mb-8 bg-linear-to-r from-purple-400 to-pink-500 bg-clip-text text-4xl font-black text-transparent">
             🧠 Memory Match
           </h1>
 
           {/* Game Grid */}
-          <div className="grid grid-cols-4 gap-4 max-w-md mx-auto mb-8">
+          <div className="mx-auto mb-8 grid max-w-md grid-cols-4 gap-4">
             {cards.map((card) => (
-              <div
+              <button
+                type="button"
                 key={card.id}
                 onClick={() => flipCard(card.id)}
-                className={`w-20 h-20 cursor-pointer transition-all duration-500 ${card.matched ? "opacity-60" : ""}`}
+                onKeyDown={(e) => e.key === "Enter" && flipCard(card.id)}
+                className={`h-20 w-20 cursor-pointer transition-all duration-500 ${card.matched ? "opacity-60" : ""}`}
                 style={{ perspective: 1000 }}
               >
                 <div
-                  className="relative w-full h-full transition-transform duration-500"
+                  className="relative h-full w-full transition-transform duration-500"
                   style={{
                     transformStyle: "preserve-3d",
                     transform: card.flipped || card.matched ? "rotateY(180deg)" : "rotateY(0)",
@@ -125,7 +125,7 @@ export default function MemoryMatchGame() {
                 >
                   {/* Front */}
                   <div
-                    className="absolute w-full h-full rounded-xl flex items-center justify-center text-4xl border-2 border-white/20"
+                    className="absolute flex h-full w-full items-center justify-center rounded-xl border-2 border-white/20 text-4xl"
                     style={{
                       backfaceVisibility: "hidden",
                       background:
@@ -136,7 +136,7 @@ export default function MemoryMatchGame() {
                   </div>
                   {/* Back */}
                   <div
-                    className="absolute w-full h-full rounded-xl flex items-center justify-center text-4xl border-2 border-white/30"
+                    className="absolute flex h-full w-full items-center justify-center rounded-xl border-2 border-white/30 text-4xl"
                     style={{
                       backfaceVisibility: "hidden",
                       transform: "rotateY(180deg)",
@@ -147,13 +147,14 @@ export default function MemoryMatchGame() {
                     {card.emoji}
                   </div>
                 </div>
-              </div>
+              </button>
             ))}
           </div>
 
           <button
+            type="button"
             onClick={initGame}
-            className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-8 py-3 rounded-full text-xl font-bold hover:scale-105 active:scale-95 transition-all shadow-lg"
+            className="rounded-full bg-linear-to-r from-purple-500 to-pink-500 px-8 py-3 text-xl font-bold text-white shadow-lg transition-all hover:scale-105 active:scale-95"
           >
             New Game
           </button>
@@ -162,16 +163,17 @@ export default function MemoryMatchGame() {
 
       {/* Win Screen */}
       {gameWon && (
-        <div className="fixed inset-0 flex items-center justify-center z-30 bg-slate-900/90 backdrop-blur-sm">
+        <div className="fixed inset-0 z-30 flex items-center justify-center bg-slate-900/90 backdrop-blur-sm">
           <div className="text-center">
-            <h1 className="text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-orange-500 mb-4">
+            <h1 className="mb-4 bg-linear-to-r from-yellow-400 to-orange-500 bg-clip-text text-6xl font-black text-transparent">
               🎉 You Win!
             </h1>
-            <p className="text-slate-400 text-2xl mb-2">Completed in</p>
-            <p className="text-4xl font-black text-white mb-8">{moves} moves</p>
+            <p className="mb-2 text-2xl text-slate-400">Completed in</p>
+            <p className="mb-8 text-4xl font-black text-white">{moves} moves</p>
             <button
+              type="button"
               onClick={initGame}
-              className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-12 py-4 rounded-full text-2xl font-bold hover:scale-105 active:scale-95 transition-all shadow-lg"
+              className="rounded-full bg-linear-to-r from-purple-500 to-pink-500 px-12 py-4 text-2xl font-bold text-white shadow-lg transition-all hover:scale-105 active:scale-95"
             >
               Play Again
             </button>
