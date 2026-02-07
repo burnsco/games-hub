@@ -365,7 +365,7 @@ export default function ColorSwitchGame() {
   }, [jump]);
 
   return (
-    <div className="relative flex h-[calc(100dvh-73px)] items-center justify-center overflow-hidden bg-linear-to-b from-slate-950 via-indigo-950 to-slate-950 px-4 py-4">
+    <div className="relative flex h-[100dvh] items-center justify-center overflow-hidden bg-linear-to-b from-slate-950 via-indigo-950 to-slate-950 px-4 py-4">
       <div className="pointer-events-none absolute left-[-10%] top-[-10%] h-[45%] w-[45%] rounded-full bg-fuchsia-500/10 blur-[140px]" />
       <div className="pointer-events-none absolute bottom-[-10%] right-[-10%] h-[45%] w-[45%] rounded-full bg-cyan-500/10 blur-[140px]" />
 

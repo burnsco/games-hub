@@ -215,7 +215,7 @@ export default function SnakeGame() {
   }, [snake, food]);
 
   return (
-    <div className="relative flex h-[calc(100dvh-73px)] w-full items-center justify-center overflow-hidden bg-linear-to-br from-green-900 via-emerald-900 to-slate-900">
+    <div className="relative flex h-[100dvh] w-full items-center justify-center overflow-hidden bg-linear-to-br from-green-900 via-emerald-900 to-slate-900">
       {/* Score */}
       <div className="absolute right-4 top-4 z-20 text-right">
         <div className="text-3xl font-bold text-white">Score: {score}</div>

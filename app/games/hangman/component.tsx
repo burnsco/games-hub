@@ -128,7 +128,7 @@ export default function HangmanGame() {
   ];
 
   return (
-    <div className="relative flex h-[calc(100dvh-73px)] w-full items-center justify-center overflow-hidden bg-linear-to-b from-slate-950 via-slate-900 to-slate-950 px-3 py-3 md:px-6">
+    <div className="relative flex h-[100dvh] w-full items-center justify-center overflow-hidden bg-linear-to-b from-slate-950 via-slate-900 to-slate-950 px-3 py-3 md:px-6">
       <div className="pointer-events-none absolute left-[-10%] top-[-10%] h-[40%] w-[40%] rounded-full bg-amber-500/10 blur-[120px]" />
       <div className="pointer-events-none absolute bottom-[-10%] right-[-10%] h-[40%] w-[40%] rounded-full bg-cyan-500/10 blur-[120px]" />
 

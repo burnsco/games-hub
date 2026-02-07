@@ -495,7 +495,7 @@ export default function AsteroidDriftGame() {
   }, [startGame]);
 
   return (
-    <div className="relative flex h-[calc(100dvh-73px)] w-full items-center justify-center overflow-hidden bg-slate-950">
+    <div className="relative flex h-[100dvh] w-full items-center justify-center overflow-hidden bg-slate-950">
       {/* Background stars (static for performance) */}
       <div
         className="absolute inset-0 opacity-50"

@@ -184,7 +184,7 @@ export default function WhackAMoleGame() {
   };
 
   return (
-    <div className="relative flex h-[calc(100dvh-73px)] w-full items-center justify-center overflow-hidden bg-linear-to-br from-slate-950 via-gray-900 to-slate-950 px-2">
+    <div className="relative flex h-[100dvh] w-full items-center justify-center overflow-hidden bg-linear-to-br from-slate-950 via-gray-900 to-slate-950 px-2">
       {/* Background glow */}
       <div className="absolute left-[-10%] top-[-10%] h-[50%] w-[50%] rounded-full bg-purple-600/10 blur-[120px]" />
       <div className="absolute bottom-[-10%] right-[-10%] h-[50%] w-[50%] rounded-full bg-cyan-600/10 blur-[120px]" />

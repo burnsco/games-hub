@@ -7,6 +7,9 @@ import ThemePicker from "./ThemePicker";
 
 export default function NavBar() {
   const pathname = usePathname();
+  const isGameRoute = pathname.startsWith("/games/");
+  if (isGameRoute) return null;
+
   const activeGame = games.find((game) => game.path === pathname);
   const centerTitle = activeGame
     ? `${activeGame.icon} ${activeGame.name}`

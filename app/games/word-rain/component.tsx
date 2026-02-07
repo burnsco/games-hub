@@ -216,7 +216,7 @@ export default function WordRainGame() {
   }, [gameOver, score, difficulty]);
 
   return (
-    <div className="relative h-[calc(100dvh-73px)] w-full overflow-hidden bg-linear-to-b from-slate-900 via-indigo-950 to-slate-900">
+    <div className="relative h-[100dvh] w-full overflow-hidden bg-linear-to-b from-slate-900 via-indigo-950 to-slate-900">
       {/* Stars */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         {stars.map((star) => (

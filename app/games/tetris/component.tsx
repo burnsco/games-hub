@@ -390,7 +390,7 @@ export default function TetrisGame() {
   };
 
   return (
-    <div className="flex h-[calc(100dvh-73px)] w-full flex-col items-center justify-center overflow-hidden bg-slate-950 p-2 font-sans md:p-4">
+    <div className="flex h-[100dvh] w-full flex-col items-center justify-center overflow-hidden bg-slate-950 p-2 font-sans md:p-4">
       <div className="flex gap-8 items-start">
         {/* Left Column: Hold/Stats */}
         <div className="hidden md:flex flex-col gap-4">

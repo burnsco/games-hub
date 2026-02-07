@@ -192,7 +192,7 @@ export default function BugSquashGame() {
   return (
     <div
       ref={containerRef}
-      className="bg-linear-to-br relative h-[calc(100dvh-73px)] w-full overflow-hidden from-slate-900 via-slate-800 to-slate-900"
+      className="bg-linear-to-br relative h-[100dvh] w-full overflow-hidden from-slate-900 via-slate-800 to-slate-900"
       style={{ cursor: isPlaying ? "crosshair" : "default" }}
     >
       {/* Background glow */}
@@ -291,9 +291,10 @@ export default function BugSquashGame() {
         <button
           type="button"
           onClick={stopGame}
-          className="absolute bottom-8 left-1/2 z-20 -translate-x-1/2 rounded-full border-4 border-white bg-red-600 px-12 py-6 text-2xl font-black text-white shadow-2xl transition-all hover:scale-105 hover:bg-red-700 active:scale-95"
+          className="fixed left-4 top-18 z-50 flex items-center gap-2 rounded-full border border-white/20 bg-red-700/80 px-4 py-2 font-semibold text-white backdrop-blur-md transition-all hover:border-white/40 hover:bg-red-700/95"
         >
-          STOP GAME
+          <span className="text-base leading-none">■</span>
+          <span>Stop Game</span>
         </button>
       )}
     </div>

@@ -106,7 +106,7 @@ export default function MemoryMatchGame() {
   };
 
   return (
-    <div className="relative h-[calc(100dvh-73px)] w-full overflow-hidden bg-linear-to-br from-purple-900 via-indigo-900 to-slate-900 p-4 md:p-8">
+    <div className="relative h-[100dvh] w-full overflow-hidden bg-linear-to-br from-purple-900 via-indigo-900 to-slate-900 p-4 md:p-8">
       {/* Stats */}
       <div className="absolute right-4 top-4 z-20 text-right">
         <div className="text-2xl font-bold text-white">Moves: {moves}</div>

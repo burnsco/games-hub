@@ -217,7 +217,7 @@ export default function StackTowersGame() {
   }, [placeBlock, startGame]);
 
   return (
-    <div className="relative flex h-[calc(100dvh-73px)] items-center justify-center overflow-hidden bg-linear-to-b from-slate-950 via-slate-900 to-slate-950 px-4 py-4">
+    <div className="relative flex h-[100dvh] items-center justify-center overflow-hidden bg-linear-to-b from-slate-950 via-slate-900 to-slate-950 px-4 py-4">
       <div className="pointer-events-none absolute left-[-10%] top-[-10%] h-[40%] w-[40%] rounded-full bg-sky-500/15 blur-[120px]" />
       <div className="pointer-events-none absolute bottom-[-10%] right-[-10%] h-[40%] w-[40%] rounded-full bg-blue-600/15 blur-[120px]" />
 

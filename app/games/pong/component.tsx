@@ -197,16 +197,16 @@ export default function PongGame() {
   }, [playerY, aiY, ball]);
 
   return (
-    <div className="relative flex h-[calc(100dvh-73px)] w-full items-center justify-center overflow-hidden bg-linear-to-br from-slate-900 via-gray-900 to-slate-800">
+    <div className="relative flex h-[100dvh] w-full items-center justify-center overflow-hidden bg-linear-to-br from-slate-900 via-gray-900 to-slate-800">
       {/* Scores */}
-      <div className="absolute left-1/2 top-4 z-20 flex -translate-x-1/2 gap-16 text-center">
-        <div>
+      <div className="absolute left-4 top-1/2 z-20 -translate-y-1/2 space-y-3 text-center">
+        <div className="min-w-20 rounded-xl border border-cyan-400/30 bg-cyan-500/10 px-3 py-2">
           <div className="text-4xl font-bold text-cyan-400">{playerScore}</div>
-          <div className="text-sm text-slate-400">You</div>
+          <div className="text-xs uppercase tracking-wider text-slate-300">You</div>
         </div>
-        <div>
+        <div className="min-w-20 rounded-xl border border-red-400/30 bg-red-500/10 px-3 py-2">
           <div className="text-4xl font-bold text-red-400">{aiScore}</div>
-          <div className="text-sm text-slate-400">CPU</div>
+          <div className="text-xs uppercase tracking-wider text-slate-300">CPU</div>
         </div>
       </div>
 
