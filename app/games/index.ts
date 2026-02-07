@@ -1,4 +1,6 @@
 // Export all games for easy importing
+
+export { default as BrickBreaker } from "./brick-breaker/component";
 export { default as BugSquash } from "./bug-squash/component";
 export { default as FlappyJump } from "./flappy-jump/component";
 export { default as MemoryMatch } from "./memory-match/component";
