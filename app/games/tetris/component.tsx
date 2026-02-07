@@ -1,7 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState, useTransition } from "react";
-import { submitScore } from "@/actions";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useSoundFX } from "../../hooks/useSoundFX";
 
 // Types
@@ -96,7 +95,6 @@ export default function TetrisGame() {
   const [isMuted, setIsMuted] = useState(false);
 
   const soundFX = useSoundFX();
-  const [, startTransition] = useTransition();
 
   useEffect(() => {
     setIsClient(true);
@@ -263,13 +261,11 @@ export default function TetrisGame() {
         setIsPlaying(false);
         soundFX.playGameOver();
 
-        // Submit score
-        startTransition(async () => {
-          const currentScore = scoreRef.current;
-          if (currentScore > 0) {
-            await submitScore("tetris", currentScore, { level: levelRef.current });
-          }
-        });
+        // Game over
+        if (audioRef.current) {
+          audioRef.current.pause();
+          audioRef.current.currentTime = 0;
+        }
 
         return;
       }

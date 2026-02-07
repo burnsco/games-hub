@@ -11,12 +11,5 @@
       "pattern": "games.coreyburns.ca/*",
       "zone_name": "coreyburns.ca"
     }
-  ],
-  "d1_databases": [
-    {
-      "binding": "DB",
-      "database_name": "games-hub-db",
-      "database_id": "a31eed91-5544-4c4f-a0ce-8be5db5c010f"
-    }
   ]
 }
