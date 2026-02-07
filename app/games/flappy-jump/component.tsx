@@ -206,12 +206,7 @@ export default function FlappyJumpGame() {
   }, [birdY, pipes]);
 
   return (
-    <button
-      type="button"
-      className="relative flex h-screen w-full items-center justify-center bg-linear-to-b from-sky-400 via-sky-300 to-sky-200"
-      onClick={jump}
-      onKeyDown={(e) => (e.key === " " || e.key === "Enter") && jump()}
-    >
+    <div className="relative flex h-[calc(100dvh-73px)] w-full items-center justify-center overflow-hidden bg-linear-to-b from-sky-400 via-sky-300 to-sky-200 px-3 py-4 md:py-6">
       {/* Score */}
       <div className="absolute right-4 top-4 z-20 text-right">
         <div className="text-4xl font-bold text-white drop-shadow-lg">{score}</div>
@@ -219,16 +214,20 @@ export default function FlappyJumpGame() {
       </div>
 
       <div className="text-center">
-        <h1 className="mb-6 text-4xl font-black text-white drop-shadow-lg">🐦 Flappy Jump</h1>
+        <h1 className="mb-3 text-3xl font-black text-white drop-shadow-lg md:text-4xl">
+          🐦 Flappy Jump
+        </h1>
 
         <canvas
           ref={canvasRef}
-          width={400}
-          height={500}
-          className="rounded-2xl border-4 border-white/50 shadow-2xl"
+          width={360}
+          height={430}
+          className="max-h-[58dvh] w-full max-w-[360px] rounded-2xl border-4 border-white/50 shadow-2xl"
         />
 
-        <p className="mt-4 font-medium text-sky-800">Press SPACE or Click to jump!</p>
+        <p className="mt-3 text-sm font-medium text-sky-800 md:text-base">
+          Press SPACE or Click to jump!
+        </p>
 
         <button
           type="button"
@@ -236,7 +235,7 @@ export default function FlappyJumpGame() {
             e.stopPropagation();
             startGame();
           }}
-          className="mt-6 rounded-full border-2 border-white/50 bg-linear-to-r from-yellow-400 to-orange-400 px-8 py-3 text-xl font-bold text-white shadow-lg transition-all hover:scale-105 active:scale-95"
+          className="mt-4 rounded-full border-2 border-white/50 bg-linear-to-r from-yellow-400 to-orange-400 px-8 py-2.5 text-lg font-bold text-white shadow-lg transition-all hover:scale-105 active:scale-95 md:text-xl"
         >
           {isPlaying ? "Restart" : "Start Game"}
         </button>
@@ -244,7 +243,7 @@ export default function FlappyJumpGame() {
 
       {/* Game Over */}
       {gameOver && (
-        <div className="fixed inset-0 z-30 flex items-center justify-center bg-sky-900/80 backdrop-blur-sm">
+        <div className="absolute inset-0 z-30 flex items-center justify-center bg-sky-900/80 backdrop-blur-sm">
           <div className="text-center">
             <h1 className="mb-4 text-6xl font-black text-white">Game Over!</h1>
             <p className="mb-2 text-2xl text-sky-200">Score</p>
@@ -262,6 +261,6 @@ export default function FlappyJumpGame() {
           </div>
         </div>
       )}
-    </button>
+    </div>
   );
 }
