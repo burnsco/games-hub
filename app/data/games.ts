@@ -72,12 +72,12 @@ export const games = [
     bgGlow: "rgba(217,70,239,0.3)",
   },
   {
-    name: "2048 Lite",
-    icon: "🧩",
-    path: "/games/2048-lite",
-    desc: "Slide tiles and merge to reach 2048.",
-    color: "from-orange-400 to-yellow-500",
-    bgGlow: "rgba(234,179,8,0.3)",
+    name: "Tetris",
+    icon: "🧱",
+    path: "/games/tetris",
+    desc: "Stack blocks and clear lines.",
+    color: "from-indigo-400 to-purple-600",
+    bgGlow: "rgba(99,102,241,0.3)",
   },
   {
     name: "Whack-a-Mole",
