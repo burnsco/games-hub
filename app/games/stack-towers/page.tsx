@@ -1,15 +1,11 @@
 import BackButton from "../../components/BackButton";
-import ComingSoon from "../../components/ComingSoon";
+import StackTowers from "./component";
 
 export default function Page() {
   return (
     <>
       <BackButton />
-      <ComingSoon
-        title="Stack Towers"
-        emoji="🧱"
-        description="Drop blocks carefully and build the tallest tower."
-      />
+      <StackTowers />
     </>
   );
 }
