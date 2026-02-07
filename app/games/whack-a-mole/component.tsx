@@ -14,7 +14,6 @@ interface Particle {
   life: number;
 }
 
-const GRID_SIZE = 3;
 const GAME_DURATION = 30; // Seconds
 
 export default function WhackAMoleGame() {
@@ -27,10 +26,20 @@ export default function WhackAMoleGame() {
   const [isClient, setIsClient] = useState(false);
   const [particles, setParticles] = useState<Particle[]>([]);
 
+  const isPlayingRef = useRef(false);
+  const scoreRef = useRef(0);
+  const bestScoreRef = useRef(bestScore);
   const particleIdRef = useRef(0);
-  const timerRef = useRef<NodeJS.Timeout>(null);
-  const moleTimerRef = useRef<NodeJS.Timeout>(null);
+  // biome-ignore lint/suspicious/noExplicitAny: browser compatibility
+  const timerRef = useRef<any>(null);
+  // biome-ignore lint/suspicious/noExplicitAny: browser compatibility
+  const moleTimerRef = useRef<any>(null);
   const { playSquash, playSelect, playError, playGameOver } = useSoundFX();
+
+  // Sync refs
+  useEffect(() => {
+    bestScoreRef.current = bestScore;
+  }, [bestScore]);
 
   // Handle hydration and load best score
   useEffect(() => {
@@ -72,27 +81,41 @@ export default function WhackAMoleGame() {
   }, [particles]);
 
   const spawnMole = useCallback(() => {
+    if (!isPlayingRef.current) return;
+
+    // Clear any existing mole timer to prevent overlapping cycles
+    if (moleTimerRef.current) clearTimeout(moleTimerRef.current);
+
     setActiveMole(null);
-    const delay = Math.max(400, 1000 - score * 10); // Faster as score increases
+    const delay = Math.max(300, 800 - scoreRef.current * 3);
 
     moleTimerRef.current = setTimeout(() => {
-      const nextMole = Math.floor(Math.random() * (GRID_SIZE * GRID_SIZE));
+      if (!isPlayingRef.current) return;
+
+      const nextMole = Math.floor(Math.random() * 9);
       setActiveMole(nextMole);
 
       // Auto-hide mole after some time
-      const visibleTime = Math.max(600, 1500 - score * 15);
+      const visibleTime = Math.max(500, 1400 - scoreRef.current * 10);
       moleTimerRef.current = setTimeout(() => {
+        if (!isPlayingRef.current) return;
         setActiveMole(null);
-        if (isPlaying) spawnMole();
+        spawnMole();
       }, visibleTime);
     }, delay);
-  }, [score, isPlaying]);
+  }, []);
 
   const startGame = () => {
+    // Cleanup any existing timers
+    if (timerRef.current) clearInterval(timerRef.current);
+    if (moleTimerRef.current) clearTimeout(moleTimerRef.current);
+
     setScore(0);
+    scoreRef.current = 0;
     setTimeLeft(GAME_DURATION);
     setGameOver(false);
     setIsPlaying(true);
+    isPlayingRef.current = true;
     playSelect();
     spawnMole();
 
@@ -110,12 +133,12 @@ export default function WhackAMoleGame() {
 
   const endGame = useCallback(() => {
     setIsPlaying(false);
+    isPlayingRef.current = false;
     setGameOver(true);
     setActiveMole(null);
     if (timerRef.current) clearInterval(timerRef.current);
     if (moleTimerRef.current) clearTimeout(moleTimerRef.current);
     playGameOver();
-
     setScore((currentScore) => {
       if (currentScore > bestScore) {
         setBestScore(currentScore);
@@ -125,26 +148,38 @@ export default function WhackAMoleGame() {
     });
   }, [bestScore, playGameOver]);
 
-  const handleWhack = (index: number, e: React.MouseEvent | React.TouchEvent) => {
-    if (!isPlaying) return;
+  const handleWhack = (
+    index: number,
+    e: React.MouseEvent | React.TouchEvent | React.KeyboardEvent,
+  ) => {
+    if (!isPlayingRef.current) return;
 
     if (index === activeMole) {
-      setScore((prev) => prev + 10);
+      scoreRef.current += 10;
+      const newScore = scoreRef.current;
+      setScore(newScore);
       setActiveMole(null);
       playSquash();
 
+      if (newScore > bestScoreRef.current) {
+        setBestScore(newScore);
+        localStorage.setItem("whackAMoleBestScore", newScore.toString());
+      }
+
       // Get click position for explosion
-      const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-      const centerX = rect.left + rect.width / 2;
-      const centerY = rect.top + rect.height / 2;
-      createExplosion(centerX, centerY);
+      // biome-ignore lint/suspicious/noExplicitAny: event type compatibility
+      const clientX = "touches" in e ? (e as any).touches[0].clientX : (e as any).clientX;
+      // biome-ignore lint/suspicious/noExplicitAny: event type compatibility
+      const clientY = "touches" in e ? (e as any).touches[0].clientY : (e as any).clientY;
+      createExplosion(clientX || 0, clientY || 0);
 
       // Immediately spawn next to keep momentum
       if (moleTimerRef.current) clearTimeout(moleTimerRef.current);
       spawnMole();
     } else {
       playError();
-      setScore((prev) => Math.max(0, prev - 5));
+      scoreRef.current = Math.max(0, scoreRef.current - 5);
+      setScore(scoreRef.current);
     }
   };
 
