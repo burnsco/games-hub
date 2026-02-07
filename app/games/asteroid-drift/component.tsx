@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useSoundFX } from "../../hooks/useSoundFX";
 
@@ -505,14 +506,21 @@ export default function AsteroidDriftGame() {
         }}
       ></div>
 
-      {/* Stats */}
-      <div className="absolute left-1/2 top-4 z-20 flex -translate-x-1/2 gap-16 text-center">
-        <div>
-          <div className="text-4xl font-bold text-white drop-shadow-lg font-mono">{score}</div>
+      <div className="absolute left-4 top-4 z-20 w-44 space-y-3">
+        <Link
+          href="/"
+          className="flex items-center justify-center rounded-full border border-white/20 bg-black/40 px-4 py-2 font-semibold text-white backdrop-blur-md transition-all hover:border-white/40 hover:bg-black/60"
+        >
+          Back to Games
+        </Link>
+
+        <div className="rounded-xl border border-white/10 bg-black/35 p-3 text-center">
+          <div className="font-mono text-3xl font-bold text-white drop-shadow-lg">{score}</div>
           <div className="text-xs uppercase tracking-widest text-slate-400">Score</div>
         </div>
-        <div>
-          <div className="flex gap-2 text-2xl">
+
+        <div className="rounded-xl border border-white/10 bg-black/35 p-3 text-center">
+          <div className="flex justify-center gap-2 text-2xl">
             {[...Array(lives)].map((_, i) => (
               // biome-ignore lint/suspicious/noArrayIndexKey: fixed size array
               <span key={i}>🚀</span>
@@ -520,8 +528,9 @@ export default function AsteroidDriftGame() {
           </div>
           <div className="text-xs uppercase tracking-widest text-slate-400">Lives</div>
         </div>
-        <div>
-          <div className="text-4xl font-bold text-slate-400 font-mono">
+
+        <div className="rounded-xl border border-white/10 bg-black/35 p-3 text-center">
+          <div className="font-mono text-3xl font-bold text-slate-300">
             {isClient ? highScore : 0}
           </div>
           <div className="text-xs uppercase tracking-widest text-slate-400">High Score</div>

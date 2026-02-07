@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useSoundFX } from "../../hooks/useSoundFX";
 
@@ -80,6 +81,7 @@ export default function TetrisGame() {
   const [level, setLevel] = useState(1);
   const [gameOver, setGameOver] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
   const [highScore, setHighScore] = useState(0);
   const [isClient, setIsClient] = useState(false);
 
@@ -109,6 +111,7 @@ export default function TetrisGame() {
     setLevel(1);
     levelRef.current = 1;
     setGameOver(false);
+    setIsPaused(false);
     setIsPlaying(true);
     dropIntervalRef.current = 1000;
 
@@ -128,6 +131,26 @@ export default function TetrisGame() {
       collided: false,
     });
   }, []);
+
+  const pauseGame = useCallback(() => {
+    if (!isPlaying || gameOver) return;
+    setIsPaused(true);
+    setIsPlaying(false);
+    if (audioRef.current) {
+      audioRef.current.pause();
+    }
+  }, [isPlaying, gameOver]);
+
+  const resumeGame = useCallback(() => {
+    if (!isPaused || gameOver) return;
+    setIsPaused(false);
+    setIsPlaying(true);
+    if (audioRef.current && !isMuted) {
+      audioRef.current.play().catch(() => {
+        // Auto-play policy might block this if no interaction yet
+      });
+    }
+  }, [isPaused, gameOver, isMuted]);
 
   // Check for collision using refs to avoid stale state in loop?
   // Actually, for the loop we might need to rely on functional state updates or refs for grid too.
@@ -258,6 +281,7 @@ export default function TetrisGame() {
       // Lock
       if (activePieceRef.current.pos.y < 1) {
         setGameOver(true);
+        setIsPaused(false);
         setIsPlaying(false);
         soundFX.playGameOver();
 
@@ -416,6 +440,37 @@ export default function TetrisGame() {
               {isMuted ? "Unmute" : "Mute"}
             </div>
           </button>
+          {isPlaying && (
+            <button
+              type="button"
+              onClick={pauseGame}
+              className="w-32 rounded-xl border border-slate-800 bg-slate-900 p-3 text-sm font-bold text-slate-200 transition-colors hover:bg-slate-800"
+            >
+              Pause
+            </button>
+          )}
+          {isPaused && (
+            <button
+              type="button"
+              onClick={resumeGame}
+              className="w-32 rounded-xl border border-slate-800 bg-slate-900 p-3 text-sm font-bold text-slate-200 transition-colors hover:bg-slate-800"
+            >
+              Resume
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={resetGame}
+            className="w-32 rounded-xl border border-indigo-500/50 bg-indigo-700 p-3 text-sm font-bold text-white transition-colors hover:bg-indigo-600"
+          >
+            Restart
+          </button>
+          <Link
+            href="/"
+            className="w-32 rounded-xl border border-slate-800 bg-slate-900 p-3 text-center text-sm font-bold text-slate-200 transition-colors hover:bg-slate-800"
+          >
+            Back to Games
+          </Link>
         </div>
 
         {/* Main Game Area */}
@@ -439,7 +494,7 @@ export default function TetrisGame() {
           </div>
 
           {/* Overlays */}
-          {(!isPlaying || gameOver) && (
+          {((!isPlaying && !isPaused) || gameOver) && (
             <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-950/80 backdrop-blur-sm z-10">
               <h2 className="text-4xl font-black text-white mb-2">TETRIS</h2>
               {gameOver && <p className="text-red-500 font-bold text-xl mb-4">GAME OVER</p>}
@@ -457,13 +512,34 @@ export default function TetrisGame() {
         {/* Mobile Stats (visible only on small screens) */}
         <div className="md:hidden flex flex-col gap-4">
           <div className="text-white text-center">Score: {score}</div>
+          {isPlaying && (
+            <button
+              type="button"
+              onClick={pauseGame}
+              className="px-4 py-2 bg-slate-700 rounded text-white text-sm"
+            >
+              Pause
+            </button>
+          )}
+          {isPaused && (
+            <button
+              type="button"
+              onClick={resumeGame}
+              className="px-4 py-2 bg-slate-700 rounded text-white text-sm"
+            >
+              Resume
+            </button>
+          )}
           <button
             type="button"
             onClick={resetGame}
             className="px-4 py-2 bg-indigo-600 rounded text-white text-sm"
           >
-            Reset
+            Restart
           </button>
+          <Link href="/" className="px-4 py-2 bg-slate-800 rounded text-white text-sm text-center">
+            Back to Games
+          </Link>
         </div>
       </div>
 

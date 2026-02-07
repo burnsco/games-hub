@@ -221,14 +221,8 @@ export default function StackTowersGame() {
       <div className="pointer-events-none absolute left-[-10%] top-[-10%] h-[40%] w-[40%] rounded-full bg-sky-500/15 blur-[120px]" />
       <div className="pointer-events-none absolute bottom-[-10%] right-[-10%] h-[40%] w-[40%] rounded-full bg-blue-600/15 blur-[120px]" />
 
-      <div className="relative z-10 w-full max-w-3xl">
-        <div className="mb-6 text-center">
-          <p className="mt-2 text-slate-400">
-            Time each drop. Perfect alignment builds a taller tower.
-          </p>
-        </div>
-
-        <div className="mb-5 grid grid-cols-2 gap-3 text-center md:grid-cols-4">
+      <div className="relative z-10 mx-auto flex w-full max-w-[980px] flex-col items-center gap-4 lg:flex-row lg:items-start lg:gap-6">
+        <aside className="grid w-full max-w-[520px] grid-cols-2 gap-3 text-center lg:hidden">
           <div className="rounded-xl border border-white/10 bg-white/5 px-4 py-3">
             <div className="text-xs uppercase tracking-widest text-slate-400">Score</div>
             <div className="text-3xl font-black text-white">{score}</div>
@@ -243,7 +237,27 @@ export default function StackTowersGame() {
               Click stage or press Space / Enter
             </div>
           </div>
-        </div>
+        </aside>
+
+        <aside className="hidden w-52 shrink-0 space-y-3 rounded-2xl border border-white/10 bg-white/5 p-4 text-center backdrop-blur-sm lg:block">
+          <p className="text-sm text-slate-300">
+            Time each drop. Perfect alignment builds a taller tower.
+          </p>
+          <div className="rounded-xl border border-white/10 bg-black/20 p-3">
+            <div className="text-4xl font-black text-white">{score}</div>
+            <div className="text-xs uppercase tracking-widest text-slate-400">Score</div>
+          </div>
+          <div className="rounded-xl border border-white/10 bg-black/20 p-3">
+            <div className="text-4xl font-black text-sky-300">{bestScore}</div>
+            <div className="text-xs uppercase tracking-widest text-slate-400">Best</div>
+          </div>
+          <div className="rounded-xl border border-white/10 bg-black/20 p-3">
+            <div className="text-xs uppercase tracking-widest text-slate-400">Controls</div>
+            <div className="mt-1 text-sm font-semibold text-slate-100">
+              Click stage or press Space / Enter
+            </div>
+          </div>
+        </aside>
 
         <button
           type="button"

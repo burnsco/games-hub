@@ -365,18 +365,12 @@ export default function ColorSwitchGame() {
   }, [jump]);
 
   return (
-    <div className="relative flex h-[100dvh] items-center justify-center overflow-hidden bg-linear-to-b from-slate-950 via-indigo-950 to-slate-950 px-4 py-4">
+    <div className="relative flex h-[100dvh] w-full items-center justify-center overflow-hidden bg-linear-to-b from-slate-950 via-indigo-950 to-slate-950 px-4 py-4">
       <div className="pointer-events-none absolute left-[-10%] top-[-10%] h-[45%] w-[45%] rounded-full bg-fuchsia-500/10 blur-[140px]" />
       <div className="pointer-events-none absolute bottom-[-10%] right-[-10%] h-[45%] w-[45%] rounded-full bg-cyan-500/10 blur-[140px]" />
 
-      <div className="relative z-10 w-full max-w-2xl">
-        <div className="mb-6 text-center">
-          <p className="mt-2 text-slate-300">
-            Jump through matching segments and survive as long as possible.
-          </p>
-        </div>
-
-        <div className="mb-4 grid grid-cols-2 gap-3 text-center">
+      <div className="relative z-10 mx-auto flex w-full max-w-[1180px] flex-col items-center gap-4 lg:flex-row lg:items-start lg:gap-6">
+        <aside className="grid w-full max-w-[460px] grid-cols-2 gap-3 text-center lg:hidden">
           <div className="rounded-xl border border-white/10 bg-white/5 px-4 py-3">
             <div className="text-xs uppercase tracking-widest text-slate-400">Score</div>
             <div className="text-3xl font-black text-white">{score}</div>
@@ -385,14 +379,26 @@ export default function ColorSwitchGame() {
             <div className="text-xs uppercase tracking-widest text-slate-400">Best</div>
             <div className="text-3xl font-black text-cyan-300">{bestScore}</div>
           </div>
-        </div>
+        </aside>
 
-        <div className="relative mx-auto w-full max-w-[420px] overflow-hidden rounded-2xl border border-white/15 shadow-[0_0_40px_rgba(56,189,248,0.18)]">
+        <aside className="hidden w-52 shrink-0 space-y-3 rounded-2xl border border-white/10 bg-white/5 p-4 text-center backdrop-blur-sm lg:block">
+          <div className="rounded-xl border border-white/10 bg-black/20 p-3">
+            <div className="text-4xl font-black text-white">{score}</div>
+            <div className="text-xs uppercase tracking-widest text-slate-400">Score</div>
+          </div>
+          <div className="rounded-xl border border-white/10 bg-black/20 p-3">
+            <div className="text-4xl font-black text-cyan-300">{bestScore}</div>
+            <div className="text-xs uppercase tracking-widest text-slate-400">Best</div>
+          </div>
+          <p className="text-xs text-slate-400">Click or press Space/Enter to jump.</p>
+        </aside>
+
+        <div className="relative mx-auto w-full max-w-[460px] overflow-hidden rounded-2xl border border-white/15 shadow-[0_0_40px_rgba(56,189,248,0.18)]">
           <canvas
             ref={canvasRef}
             width={GAME_WIDTH}
             height={GAME_HEIGHT}
-            className="block h-auto max-h-[72dvh] w-full cursor-pointer"
+            className="block h-auto max-h-[86dvh] w-full cursor-pointer"
             onClick={jump}
           />
 
