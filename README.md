@@ -14,7 +14,7 @@ Games Hub is designed for quick sessions with zero install friction. The project
 - Bug Squash
 - Coins Dice
 - Color Switch
-- Flappy Jump
+- Hangman
 - Memory Match
 - Pong
 - Snake

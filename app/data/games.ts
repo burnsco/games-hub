@@ -40,12 +40,12 @@ export const games = [
     bgGlow: "rgba(34,211,238,0.3)",
   },
   {
-    name: "Flappy Jump",
-    icon: "🐦",
-    path: "/games/flappy-jump",
-    desc: "Tap to fly through the pipes!",
-    color: "from-yellow-400 to-orange-400",
-    bgGlow: "rgba(250,204,21,0.3)",
+    name: "Hangman",
+    icon: "🔤",
+    path: "/games/hangman",
+    desc: "Guess letters before the drawing is complete.",
+    color: "from-amber-400 to-orange-500",
+    bgGlow: "rgba(251,146,60,0.28)",
   },
   {
     name: "Brick Breaker",
