@@ -1,36 +1,62 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Games Hub
+
+A browser arcade built with Next.js App Router. It bundles a collection of lightweight, instant-play games behind a single clean interface.
+
+## Overview
+
+Games Hub is designed for quick sessions with zero install friction. The project uses modern React patterns with Next.js and is configured for Cloudflare deployment.
+
+## Included Games
+
+- 2048 Lite
+- Asteroid Drift
+- Brick Breaker
+- Bug Squash
+- Coins Dice
+- Color Switch
+- Flappy Jump
+- Memory Match
+- Pong
+- Snake
+- Stack Towers
+- Whack-a-Mole
+- Word Rain
+
+## Tech Stack
+
+- Next.js 16 (App Router)
+- React 19
+- TypeScript
+- Tailwind CSS 4
+- Biome
+- OpenNext + Cloudflare Workers
 
 ## Getting Started
 
-First, run the development server:
-
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+bun install
+bun run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open `http://localhost:3000`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Scripts
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+bun run dev
+bun run build
+bun run build:worker
+bun run deploy
+bun run lint
+bun run lint:fix
+bun run format
+```
 
-## Learn More
+## Deployment
 
-To learn more about Next.js, take a look at the following resources:
+Cloudflare deployment is configured via OpenNext:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+bun run build:worker
+bun run deploy
+```
