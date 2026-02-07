@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, useTransition } from "react";
+import { submitScore } from "@/actions";
 import { useSoundFX } from "../../hooks/useSoundFX";
 
 // Types
@@ -84,15 +85,18 @@ export default function TetrisGame() {
   const [isClient, setIsClient] = useState(false);
 
   // Refs for muteable state in loop
-  const requestRef = useRef<number>();
-  const lastTimeRef = useRef<number>();
+  const requestRef = useRef<number | undefined>(undefined);
+  const lastTimeRef = useRef<number | undefined>(undefined);
   const dropCounterRef = useRef(0);
   const dropIntervalRef = useRef(1000);
+  const scoreRef = useRef(0);
+  const levelRef = useRef(1);
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [isMuted, setIsMuted] = useState(false);
 
   const soundFX = useSoundFX();
+  const [, startTransition] = useTransition();
 
   useEffect(() => {
     setIsClient(true);
@@ -103,7 +107,9 @@ export default function TetrisGame() {
   const resetGame = useCallback(() => {
     setGrid(createGrid());
     setScore(0);
+    scoreRef.current = 0;
     setLevel(1);
+    levelRef.current = 1;
     setGameOver(false);
     setIsPlaying(true);
     dropIntervalRef.current = 1000;
@@ -221,9 +227,14 @@ export default function TetrisGame() {
             setHighScore(newScore);
             localStorage.setItem("tetrisHighScore", newScore.toString());
           }
+          scoreRef.current = newScore;
           return newScore;
         });
-        setLevel((prev) => prev + Math.floor(rowsCleared * 0.1)); // Simple leveling
+        setLevel((prev) => {
+          const newLevel = prev + Math.floor(rowsCleared * 0.1);
+          levelRef.current = newLevel;
+          return newLevel;
+        }); // Simple leveling
         dropIntervalRef.current = Math.max(100, 1000 - level * 50);
         soundFX.playScore();
       }
@@ -251,6 +262,15 @@ export default function TetrisGame() {
         setGameOver(true);
         setIsPlaying(false);
         soundFX.playGameOver();
+
+        // Submit score
+        startTransition(async () => {
+          const currentScore = scoreRef.current;
+          if (currentScore > 0) {
+            await submitScore("tetris", currentScore, { level: levelRef.current });
+          }
+        });
+
         return;
       }
 

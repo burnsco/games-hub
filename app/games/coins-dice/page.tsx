@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import BackButton from "@/app/components/BackButton";
+import BackButton from "@/components/BackButton";
 
 interface CoinStats {
   heads: number;

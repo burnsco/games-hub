@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Outfit } from "next/font/google";
 import "./globals.css";
+import NavBar from "./components/NavBar";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -26,7 +27,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="scroll-smooth">
-      <body className={`${inter.variable} ${outfit.variable} antialiased`}>{children}</body>
+      <body className={`${inter.variable} ${outfit.variable} antialiased`}>
+        <NavBar />
+        {children}
+      </body>
     </html>
   );
 }

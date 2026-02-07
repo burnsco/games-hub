@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { wordRainWords } from "@/app/data/wordRain";
+import { wordRainWords } from "@/data/wordRain";
 import { useSoundFX } from "../../hooks/useSoundFX";
 
 interface FallingWord {
