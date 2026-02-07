@@ -184,7 +184,7 @@ export default function WhackAMoleGame() {
   };
 
   return (
-    <div className="relative flex h-screen w-full items-center justify-center bg-linear-to-br from-slate-950 via-gray-900 to-slate-950 overflow-hidden">
+    <div className="relative flex min-h-screen w-full items-start justify-center bg-linear-to-br from-slate-950 via-gray-900 to-slate-950 overflow-y-auto pt-16 pb-20 sm:items-center sm:pt-0 sm:pb-0">
       {/* Background glow */}
       <div className="absolute left-[-10%] top-[-10%] h-[50%] w-[50%] rounded-full bg-purple-600/10 blur-[120px]" />
       <div className="absolute bottom-[-10%] right-[-10%] h-[50%] w-[50%] rounded-full bg-cyan-600/10 blur-[120px]" />
@@ -209,39 +209,46 @@ export default function WhackAMoleGame() {
         ))}
       </div>
 
-      <div className="z-10 text-center">
-        <h1 className="mb-8 bg-linear-to-r from-purple-400 to-cyan-400 bg-clip-text text-5xl font-black text-transparent uppercase tracking-tighter">
+      <div className="z-10 text-center px-4">
+        <h1 className="mb-4 bg-linear-to-r from-purple-400 to-cyan-400 bg-clip-text text-3xl sm:text-5xl font-black text-transparent uppercase tracking-tighter">
           Whack-A-Mole.exe
         </h1>
 
-        <div className="mb-8 flex justify-center gap-12">
+        <div className="mb-6 flex justify-center gap-6 sm:gap-12">
           <div className="text-center">
-            <div className="text-4xl font-black text-white">{score}</div>
-            <div className="text-xs font-bold uppercase tracking-widest text-purple-400">Score</div>
+            <div className="text-2xl sm:text-4xl font-black text-white">{score}</div>
+            <div className="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-purple-400">
+              Score
+            </div>
           </div>
           <div className="text-center">
             <div
-              className={`text-4xl font-black transition-colors ${timeLeft < 10 ? "text-red-500 animate-pulse" : "text-white"}`}
+              className={`text-2xl sm:text-4xl font-black transition-colors ${timeLeft < 10 ? "text-red-500 animate-pulse" : "text-white"}`}
             >
               {timeLeft}s
             </div>
-            <div className="text-xs font-bold uppercase tracking-widest text-cyan-400">Time</div>
+            <div className="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-cyan-400">
+              Time
+            </div>
           </div>
           <div className="text-center">
-            <div className="text-4xl font-black text-slate-500">{isClient ? bestScore : 0}</div>
-            <div className="text-xs font-bold uppercase tracking-widest text-slate-500">Best</div>
+            <div className="text-2xl sm:text-4xl font-black text-slate-500">
+              {isClient ? bestScore : 0}
+            </div>
+            <div className="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-slate-500">
+              Best
+            </div>
           </div>
         </div>
-
         {/* The Grid */}
-        <div className="grid grid-cols-3 gap-4 p-4 rounded-3xl bg-slate-900/50 border-4 border-slate-800/50 shadow-2xl backdrop-blur-sm">
+        <div className="grid grid-cols-3 gap-2 sm:gap-4 p-3 sm:p-4 rounded-3xl bg-slate-900/50 border-4 border-slate-800/50 shadow-2xl backdrop-blur-sm mx-auto w-fit">
           {[...Array(9)].map((_, i) => (
             <button
               // biome-ignore lint/suspicious/noArrayIndexKey: fixed size grid
               key={i}
               type="button"
               onClick={(e) => handleWhack(i, e)}
-              className="relative h-24 w-24 sm:h-32 sm:w-32 overflow-hidden rounded-2xl bg-slate-950 border-b-8 border-slate-800 cursor-pointer group active:border-b-0 active:translate-y-2 transition-all p-0"
+              className="relative h-20 w-20 sm:h-28 sm:w-28 overflow-hidden rounded-2xl bg-slate-950 border-b-4 sm:border-b-8 border-slate-800 cursor-pointer group active:border-b-0 active:translate-y-2 transition-all p-0"
               aria-label={`Whack hole ${i + 1}`}
             >
               {/* Hole depth effect */}
@@ -249,7 +256,7 @@ export default function WhackAMoleGame() {
 
               {/* The Mole */}
               <div
-                className={`absolute inset-0 flex items-center justify-center text-5xl sm:text-7xl transition-all duration-150 transform ${
+                className={`absolute inset-0 flex items-center justify-center text-4xl sm:text-6xl transition-all duration-150 transform ${
                   activeMole === i ? "translate-y-0 opacity-100" : "translate-y-full opacity-0"
                 }`}
               >
@@ -263,7 +270,7 @@ export default function WhackAMoleGame() {
           ))}
         </div>
 
-        <p className="mt-8 text-slate-500 font-mono text-sm uppercase tracking-widest">
+        <p className="mt-4 text-slate-500 font-mono text-[10px] sm:text-xs uppercase tracking-[0.3em] opacity-40">
           Eliminate the glitched routines.
         </p>
 
@@ -271,7 +278,7 @@ export default function WhackAMoleGame() {
           <button
             type="button"
             onClick={startGame}
-            className="mt-8 rounded-full bg-linear-to-r from-purple-600 to-cyan-600 px-12 py-4 text-2xl font-black text-white shadow-[0_0_30px_rgba(147,51,234,0.3)] transition-all hover:scale-105 hover:shadow-[0_0_40px_rgba(147,51,234,0.5)] active:scale-95"
+            className="mt-6 rounded-full bg-linear-to-r from-purple-600 to-cyan-600 px-8 sm:px-12 py-3 sm:py-4 text-lg sm:text-xl font-black text-white shadow-[0_0_30px_rgba(147,51,234,0.3)] transition-all hover:scale-105 hover:shadow-[0_0_40px_rgba(147,51,234,0.5)] active:scale-95 uppercase tracking-widest"
           >
             START_MISSION
           </button>
