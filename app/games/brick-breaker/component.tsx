@@ -25,12 +25,56 @@ interface Brick {
   glowColor: string;
 }
 
-const BRICK_ROWS = 5;
-const BRICK_COLS = 8;
-const BRICK_PADDING = 10;
-const BRICK_HEIGHT = 20;
-const BRICK_TOP_OFFSET = 50;
-const BRICK_SIDE_OFFSET = 30;
+type Difficulty = "easy" | "medium" | "hard";
+
+const DIFFICULTY_CONFIG: Record<
+  Difficulty,
+  {
+    label: string;
+    rows: number;
+    cols: number;
+    canvasWidth: number;
+    canvasHeight: number;
+    brickPadding: number;
+    brickHeight: number;
+    brickTopOffset: number;
+    brickSideOffset: number;
+  }
+> = {
+  easy: {
+    label: "Easy",
+    rows: 5,
+    cols: 8,
+    canvasWidth: 820,
+    canvasHeight: 520,
+    brickPadding: 10,
+    brickHeight: 20,
+    brickTopOffset: 50,
+    brickSideOffset: 30,
+  },
+  medium: {
+    label: "Medium",
+    rows: 7,
+    cols: 10,
+    canvasWidth: 960,
+    canvasHeight: 600,
+    brickPadding: 8,
+    brickHeight: 18,
+    brickTopOffset: 46,
+    brickSideOffset: 24,
+  },
+  hard: {
+    label: "Hard",
+    rows: 9,
+    cols: 12,
+    canvasWidth: 1100,
+    canvasHeight: 680,
+    brickPadding: 7,
+    brickHeight: 16,
+    brickTopOffset: 42,
+    brickSideOffset: 20,
+  },
+};
 
 const PADDLE_WIDTH = 100;
 const PADDLE_HEIGHT = 15;
@@ -39,6 +83,7 @@ const INITIAL_BALL_SPEED = 4;
 
 export default function BrickBreakerGame() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [difficulty, setDifficulty] = useState<Difficulty>("easy");
   const [score, setScore] = useState(0);
   const [lives, setLives] = useState(3);
   const [isPlayingVisible, setIsPlayingVisible] = useState(false);
@@ -72,6 +117,7 @@ export default function BrickBreakerGame() {
   const bricksRef = useRef<Brick[]>([]);
   const particlesRef = useRef<Particle[]>([]);
   const particleIdRef = useRef(0);
+  const currentDifficulty = DIFFICULTY_CONFIG[difficulty];
 
   // Sync refs with state when they change
   useEffect(() => {
@@ -92,7 +138,10 @@ export default function BrickBreakerGame() {
 
     const bricks: Brick[] = [];
     const brickWidth =
-      (canvas.width - BRICK_SIDE_OFFSET * 2 - (BRICK_COLS - 1) * BRICK_PADDING) / BRICK_COLS;
+      (canvas.width -
+        currentDifficulty.brickSideOffset * 2 -
+        (currentDifficulty.cols - 1) * currentDifficulty.brickPadding) /
+      currentDifficulty.cols;
 
     const colors = ["#ef4444", "#f97316", "#facc15", "#84cc16", "#06b6d4"];
     const glowColors = [
@@ -103,22 +152,24 @@ export default function BrickBreakerGame() {
       "rgba(6, 182, 212, 0.5)",
     ];
 
-    for (let r = 0; r < BRICK_ROWS; r++) {
-      for (let c = 0; c < BRICK_COLS; c++) {
+    for (let r = 0; r < currentDifficulty.rows; r++) {
+      for (let c = 0; c < currentDifficulty.cols; c++) {
         bricks.push({
-          x: c * (brickWidth + BRICK_PADDING) + BRICK_SIDE_OFFSET,
-          y: r * (BRICK_HEIGHT + BRICK_PADDING) + BRICK_TOP_OFFSET,
+          x: c * (brickWidth + currentDifficulty.brickPadding) + currentDifficulty.brickSideOffset,
+          y:
+            r * (currentDifficulty.brickHeight + currentDifficulty.brickPadding) +
+            currentDifficulty.brickTopOffset,
           width: brickWidth,
-          height: BRICK_HEIGHT,
+          height: currentDifficulty.brickHeight,
           active: true,
-          color: colors[r],
-          glowColor: glowColors[r],
+          color: colors[r % colors.length],
+          glowColor: glowColors[r % glowColors.length],
         });
       }
     }
     bricksRef.current = bricks;
     particlesRef.current = [];
-  }, []);
+  }, [currentDifficulty]);
 
   const startGame = () => {
     setScore(0);
@@ -357,6 +408,29 @@ export default function BrickBreakerGame() {
             <div className="text-3xl font-bold text-slate-300">{isClient ? bestScore : 0}</div>
             <div className="text-xs uppercase tracking-widest text-slate-400">Best</div>
           </div>
+          <div className="col-span-3 grid grid-cols-3 gap-2">
+            {(["easy", "medium", "hard"] as const).map((level) => {
+              const active = difficulty === level;
+              return (
+                <button
+                  key={level}
+                  type="button"
+                  onClick={() => {
+                    setDifficulty(level);
+                    setIsPlayingVisible(false);
+                  }}
+                  disabled={isPlayingVisible}
+                  className={`rounded-lg px-2 py-2 text-xs font-semibold uppercase tracking-wider transition ${
+                    active
+                      ? "bg-cyan-400 text-slate-900"
+                      : "bg-white/10 text-slate-200 hover:bg-white/20"
+                  } disabled:cursor-not-allowed disabled:opacity-60`}
+                >
+                  {DIFFICULTY_CONFIG[level].label}
+                </button>
+              );
+            })}
+          </div>
           <Link
             href="/"
             className="col-span-3 rounded-full border border-white/20 bg-black/40 px-4 py-2 text-center font-semibold text-white backdrop-blur-md transition-all hover:border-white/40 hover:bg-black/60"
@@ -388,6 +462,29 @@ export default function BrickBreakerGame() {
             <div className="text-4xl font-bold text-slate-300">{isClient ? bestScore : 0}</div>
             <div className="text-xs uppercase tracking-widest text-slate-400">Best</div>
           </div>
+          <div className="grid grid-cols-3 gap-2">
+            {(["easy", "medium", "hard"] as const).map((level) => {
+              const active = difficulty === level;
+              return (
+                <button
+                  key={level}
+                  type="button"
+                  onClick={() => {
+                    setDifficulty(level);
+                    setIsPlayingVisible(false);
+                  }}
+                  disabled={isPlayingVisible}
+                  className={`rounded-lg px-2 py-2 text-[10px] font-semibold uppercase tracking-wider transition ${
+                    active
+                      ? "bg-cyan-400 text-slate-900"
+                      : "bg-white/10 text-slate-200 hover:bg-white/20"
+                  } disabled:cursor-not-allowed disabled:opacity-60`}
+                >
+                  {DIFFICULTY_CONFIG[level].label}
+                </button>
+              );
+            })}
+          </div>
           <p className="text-xs text-slate-400">Move paddle with mouse or arrow keys.</p>
           <Link
             href="/"
@@ -397,12 +494,12 @@ export default function BrickBreakerGame() {
           </Link>
         </aside>
 
-        <div className="relative w-full max-w-[860px] text-center">
+        <div className="relative w-full max-w-[1100px] text-center">
           <canvas
             ref={canvasRef}
-            width={820}
-            height={520}
-            className="mx-auto w-full max-w-[860px] rounded-2xl border-4 border-cyan-500/30 bg-black/40 shadow-2xl"
+            width={currentDifficulty.canvasWidth}
+            height={currentDifficulty.canvasHeight}
+            className="mx-auto h-auto w-full max-w-[1100px] rounded-2xl border-4 border-cyan-500/30 bg-black/40 shadow-2xl"
           />
 
           <p className="mt-3 text-sm text-slate-500 lg:hidden">
