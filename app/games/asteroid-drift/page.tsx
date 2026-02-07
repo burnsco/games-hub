@@ -1,15 +1,5 @@
-import BackButton from "../../components/BackButton";
-import ComingSoon from "../../components/ComingSoon";
+import AsteroidDriftGame from "./component";
 
 export default function Page() {
-  return (
-    <>
-      <BackButton />
-      <ComingSoon
-        title="Asteroid Drift"
-        emoji="☄️"
-        description="Steer your ship through an asteroid field and survive the drift."
-      />
-    </>
-  );
+  return <AsteroidDriftGame />;
 }

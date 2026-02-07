@@ -1,4 +1,5 @@
 // Export all games for easy importing
+export { default as AsteroidDrift } from "./asteroid-drift/component";
 
 export { default as BrickBreaker } from "./brick-breaker/component";
 export { default as BugSquash } from "./bug-squash/component";
