@@ -13,6 +13,14 @@ interface FallingWord {
   counted: boolean; // Track if this word has already deducted a life
 }
 
+const STREAK_BONUSES: Record<number, number> = {
+  10: 500,
+  20: 1500,
+  30: 3000,
+  40: 5000,
+  50: 10000,
+};
+
 export default function WordRainGame() {
   const [score, setScore] = useState(0);
   const [lives, setLives] = useState(3);
@@ -20,6 +28,8 @@ export default function WordRainGame() {
   const [gameOver, setGameOver] = useState(false);
   const [words, setWords] = useState<FallingWord[]>([]);
   const [input, setInput] = useState("");
+  const [streak, setStreak] = useState(0);
+  const [streakRewardText, setStreakRewardText] = useState("");
   const [difficulty, setDifficulty] = useState<"easy" | "medium" | "hard">("medium");
   const [paceMultiplier, setPaceMultiplier] = useState(1);
   const [highScores, setHighScores] = useState<{
@@ -37,9 +47,10 @@ export default function WordRainGame() {
     }[]
   >([]);
   const wordIdRef = useRef(0);
+  const streakBannerTimeoutRef = useRef<number | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const countedWordsRef = useRef<Set<number>>(new Set());
-  const { playSelect, playError, playGameOver, playScore } = useSoundFX();
+  const { playSelect, playError, playGameOver, playScore, playMatch } = useSoundFX();
 
   const difficultySettings = useMemo(
     () =>
@@ -92,6 +103,8 @@ export default function WordRainGame() {
     setLives(3);
     setWords([]);
     setInput("");
+    setStreak(0);
+    setStreakRewardText("");
     setGameOver(false);
     setPaceMultiplier(1);
     setIsPlaying(true);
@@ -113,6 +126,22 @@ export default function WordRainGame() {
     if (matchIndex !== -1) {
       const matched = words[matchIndex];
       setScore((prev) => prev + matched.word.length * 10);
+      setStreak((prev) => {
+        const next = prev + 1;
+        const bonus = STREAK_BONUSES[next];
+        if (bonus) {
+          setScore((current) => current + bonus);
+          setStreakRewardText(`${next} streak! +${bonus} bonus`);
+          playMatch();
+          if (streakBannerTimeoutRef.current) {
+            window.clearTimeout(streakBannerTimeoutRef.current);
+          }
+          streakBannerTimeoutRef.current = window.setTimeout(() => {
+            setStreakRewardText("");
+          }, 1800);
+        }
+        return next;
+      });
       setWords((prev) => prev.filter((w) => w.id !== matched.id));
       setInput("");
       playScore();
@@ -140,6 +169,8 @@ export default function WordRainGame() {
 
         // Deduct one life per newly fallen word
         if (newlyFallen.length > 0) {
+          setStreak(0);
+          setStreakRewardText("");
           setLives((l) => {
             const newLives = l - newlyFallen.length;
             if (newLives <= 0) {
@@ -169,14 +200,22 @@ export default function WordRainGame() {
     return () => clearInterval(interval);
   }, [isPlaying, spawnWord, difficulty, difficultySettings, paceMultiplier]);
 
-  // Gradually increase pace every 30s
+  // Gradually increase pace every 20s
   useEffect(() => {
     if (!isPlaying) return;
     const interval = setInterval(() => {
       setPaceMultiplier((prev) => prev + 0.06);
-    }, 30000);
+    }, 20000);
     return () => clearInterval(interval);
   }, [isPlaying]);
+
+  useEffect(() => {
+    return () => {
+      if (streakBannerTimeoutRef.current) {
+        window.clearTimeout(streakBannerTimeoutRef.current);
+      }
+    };
+  }, []);
 
   // Generate stars on client-side only to avoid hydration mismatch
   useEffect(() => {
@@ -248,7 +287,16 @@ export default function WordRainGame() {
           {score}
         </div>
         <div className="text-sm uppercase tracking-widest text-slate-400">Score</div>
+        {isPlaying && <div className="text-xs font-semibold text-cyan-300">Streak: {streak}</div>}
       </div>
+
+      {streakRewardText && (
+        <div className="pointer-events-none absolute left-1/2 top-24 z-30 -translate-x-1/2">
+          <div className="rounded-full border border-cyan-300/60 bg-cyan-400/20 px-5 py-2 text-sm font-black tracking-wide text-cyan-100 shadow-lg shadow-cyan-500/20 backdrop-blur-md">
+            ✨ {streakRewardText}
+          </div>
+        </div>
+      )}
 
       {/* Falling Words */}
       {words.map((w) => (

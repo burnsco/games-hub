@@ -4,7 +4,7 @@ import { games } from "./data/games";
 export default function Home() {
   return (
     <main className="relative h-[calc(100dvh-73px)] overflow-hidden">
-      <div className="relative flex h-full items-center px-4 py-4">
+      <div className="relative flex h-full items-center px-3 py-3 md:px-4 md:py-4">
         <div className="pointer-events-none fixed left-0 top-0 -z-10 h-full w-full overflow-hidden">
           <div className="absolute left-[-10%] top-[-10%] h-[50%] w-[50%] animate-pulse rounded-full bg-blue-600/10 blur-[120px]" />
           <div
@@ -13,13 +13,13 @@ export default function Home() {
           />
         </div>
 
-        <div className="mx-auto w-full max-w-7xl">
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+        <div className="mx-auto h-full w-full max-w-[1440px]">
+          <div className="grid h-full grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3 md:grid-cols-4 md:grid-rows-3 md:auto-rows-fr">
             {games.map((game) => (
               <a
                 key={game.name}
                 href={game.path}
-                className="game-card group relative overflow-visible rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm transition-all duration-300 hover:scale-[1.02] hover:border-white/30"
+                className="game-card group relative h-full overflow-visible rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm transition-all duration-300 hover:scale-[1.02] hover:border-white/30"
                 style={{ "--glow-color": game.bgGlow } as CSSProperties}
               >
                 <div className="absolute inset-0 rounded-2xl bg-[radial-gradient(circle_at_50%_50%,var(--glow-color),transparent_70%)] opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
@@ -28,7 +28,7 @@ export default function Home() {
                   {game.icon}
                 </div>
 
-                <div className="relative z-10 min-h-[120px] p-4 md:min-h-[128px]">
+                <div className="relative z-10 flex h-full min-h-[110px] flex-col justify-end p-3 md:min-h-[128px] md:p-4">
                   <h2
                     className={`bg-linear-to-r mb-2 bg-clip-text text-xl font-bold text-transparent md:text-2xl ${game.color}`}
                   >

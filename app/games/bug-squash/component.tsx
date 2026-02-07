@@ -29,6 +29,14 @@ interface Particle {
   life: number;
 }
 
+type GameLength = "short" | "medium" | "long";
+
+const GAME_LENGTHS: Record<GameLength, { label: string; ms: number }> = {
+  short: { label: "Short (2m)", ms: 120000 },
+  medium: { label: "Medium (4m)", ms: 240000 },
+  long: { label: "Long (6m)", ms: 360000 },
+};
+
 const BUG_TYPES = [
   {
     type: "Crawler",
@@ -62,8 +70,8 @@ const BUG_TYPES = [
     type: "Cricket",
     emoji: "🦗",
     points: 320,
-    speedMin: 3.2,
-    speedMax: 3.9,
+    speedMin: 2.8,
+    speedMax: 3.4,
     sizeMin: 28,
     sizeMax: 42,
   },
@@ -71,8 +79,8 @@ const BUG_TYPES = [
     type: "Spider",
     emoji: "🕷️",
     points: 450,
-    speedMin: 3.9,
-    speedMax: 4.8,
+    speedMin: 3.2,
+    speedMax: 4.0,
     sizeMin: 26,
     sizeMax: 40,
   },
@@ -84,11 +92,25 @@ export default function BugSquashGame() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [bugs, setBugs] = useState<Bug[]>([]);
   const [speedMultiplier, setSpeedMultiplier] = useState(1);
+  const [gameLength, setGameLength] = useState<GameLength>("short");
+  const [timeLeftMs, setTimeLeftMs] = useState(GAME_LENGTHS.short.ms);
+  const [lastGameReason, setLastGameReason] = useState<"timeup" | "stopped" | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const bugIdRef = useRef(0);
+  const scoreRef = useRef(0);
+  const smashedCountRef = useRef(0);
+  const endTimeRef = useRef(0);
   const [particles, setParticles] = useState<Particle[]>([]);
   const particleIdRef = useRef(0);
   const { playSquash, playSelect, playGameOver } = useSoundFX();
+
+  useEffect(() => {
+    scoreRef.current = score;
+  }, [score]);
+
+  useEffect(() => {
+    smashedCountRef.current = smashedCount;
+  }, [smashedCount]);
 
   const createBug = useCallback(() => {
     if (!containerRef.current) return;
@@ -167,15 +189,23 @@ export default function BugSquashGame() {
     setSmashedCount(0);
     setBugs([]);
     setSpeedMultiplier(1);
+    setLastGameReason(null);
+    const selectedLengthMs = GAME_LENGTHS[gameLength].ms;
+    setTimeLeftMs(selectedLengthMs);
+    endTimeRef.current = Date.now() + selectedLengthMs;
     setIsPlaying(true);
     playSelect();
   };
 
-  const stopGame = () => {
-    setIsPlaying(false);
-    setBugs([]);
-    playGameOver();
-  };
+  const stopGame = useCallback(
+    (reason: "timeup" | "stopped" = "stopped") => {
+      setIsPlaying(false);
+      setBugs([]);
+      setLastGameReason(reason);
+      playGameOver();
+    },
+    [playGameOver],
+  );
 
   // Spawn bugs
   useEffect(() => {
@@ -188,10 +218,26 @@ export default function BugSquashGame() {
   useEffect(() => {
     if (!isPlaying) return;
     const interval = setInterval(() => {
-      setSpeedMultiplier((prev) => prev + 0.2);
-    }, 10000);
+      setSpeedMultiplier((prev) => prev + 0.12);
+    }, 12000);
     return () => clearInterval(interval);
   }, [isPlaying]);
+
+  // Game timer
+  useEffect(() => {
+    if (!isPlaying) return;
+
+    const interval = setInterval(() => {
+      const nextTimeLeft = Math.max(0, endTimeRef.current - Date.now());
+      setTimeLeftMs(nextTimeLeft);
+
+      if (nextTimeLeft <= 0) {
+        stopGame("timeup");
+      }
+    }, 100);
+
+    return () => clearInterval(interval);
+  }, [isPlaying, stopGame]);
 
   // Animate bugs
   useEffect(() => {
@@ -206,7 +252,16 @@ export default function BugSquashGame() {
               const dy = bug.targetY - bug.y;
               const dist = Math.sqrt(dx * dx + dy * dy);
 
-              if (dist < 5) return null;
+              // When a bug reaches its current target, retarget instead of removing it.
+              if (dist < 5) {
+                const viewportWidth = window.innerWidth;
+                const viewportHeight = window.innerHeight;
+                return {
+                  ...bug,
+                  targetX: Math.random() * Math.max(100, viewportWidth - 100),
+                  targetY: Math.random() * Math.max(100, viewportHeight - 180) + 80,
+                };
+              }
 
               return {
                 ...bug,
@@ -246,6 +301,12 @@ export default function BugSquashGame() {
     return () => clearInterval(interval);
   }, [isPlaying]);
 
+  const totalSecondsLeft = Math.ceil(timeLeftMs / 1000);
+  const displayMinutes = Math.floor(totalSecondsLeft / 60)
+    .toString()
+    .padStart(2, "0");
+  const displaySeconds = (totalSecondsLeft % 60).toString().padStart(2, "0");
+
   return (
     <div
       ref={containerRef}
@@ -268,6 +329,15 @@ export default function BugSquashGame() {
       )}
 
       {isPlaying && (
+        <div className="pointer-events-none absolute left-4 top-20 z-10 rounded-xl border border-white/10 bg-black/30 px-4 py-3 text-left backdrop-blur-sm">
+          <div className="text-xs uppercase tracking-wider text-slate-400">Time Left</div>
+          <div className="font-mono text-3xl font-black text-cyan-300">
+            {displayMinutes}:{displaySeconds}
+          </div>
+        </div>
+      )}
+
+      {isPlaying && (
         <div className="pointer-events-none absolute right-4 top-20 z-10 rounded-xl border border-white/10 bg-black/30 p-3 text-right backdrop-blur-sm">
           <div className="mb-1 text-xs uppercase tracking-wider text-slate-400">Bug Values</div>
           {BUG_TYPES.map((bug) => (
@@ -286,6 +356,25 @@ export default function BugSquashGame() {
       {!isPlaying && (
         <div className="absolute inset-0 z-30 flex items-center justify-center">
           <div className="text-center">
+            <div className="mb-4 flex items-center justify-center gap-2">
+              {(["short", "medium", "long"] as const).map((length) => {
+                const active = gameLength === length;
+                return (
+                  <button
+                    key={length}
+                    type="button"
+                    onClick={() => setGameLength(length)}
+                    className={`rounded-lg px-3 py-2 text-sm font-semibold transition-all ${
+                      active
+                        ? "bg-cyan-400 text-slate-900 shadow-md"
+                        : "bg-white/10 text-slate-200 hover:bg-white/20"
+                    }`}
+                  >
+                    {GAME_LENGTHS[length].label}
+                  </button>
+                );
+              })}
+            </div>
             <button
               type="button"
               onClick={startGame}
@@ -303,6 +392,13 @@ export default function BugSquashGame() {
               <br />
               Only YOU can fix it.
             </p>
+            {lastGameReason && (
+              <p className="mt-4 text-base text-slate-300">
+                {lastGameReason === "timeup" ? "Time Up!" : "Game Stopped"} Score:{" "}
+                <span className="font-bold text-white">{scoreRef.current}</span> | Smashed:{" "}
+                <span className="font-bold text-white">{smashedCountRef.current}</span>
+              </p>
+            )}
           </div>
         </div>
       )}
@@ -361,7 +457,7 @@ export default function BugSquashGame() {
       {isPlaying && (
         <button
           type="button"
-          onClick={stopGame}
+          onClick={() => stopGame("stopped")}
           className="fixed left-4 top-18 z-50 flex items-center gap-2 rounded-full border border-white/20 bg-red-700/80 px-4 py-2 font-semibold text-white backdrop-blur-md transition-all hover:border-white/40 hover:bg-red-700/95"
         >
           <span className="text-base leading-none">■</span>

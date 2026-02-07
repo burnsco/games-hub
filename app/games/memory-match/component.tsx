@@ -211,8 +211,7 @@ export default function MemoryMatchGame() {
                         style={{
                           backfaceVisibility: "hidden",
                           transform: "rotateY(180deg)",
-                          background:
-                            "linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05))",
+                          background: "#ffffff",
                         }}
                       >
                         {card.emoji}
@@ -221,14 +220,32 @@ export default function MemoryMatchGame() {
                   </button>
                 ))}
               </div>
-
-              <button
-                type="button"
-                onClick={() => initGame()}
-                className="rounded-full bg-linear-to-r from-purple-500 to-pink-500 px-8 py-3 text-xl font-bold text-white shadow-lg transition-all hover:scale-105 active:scale-95"
-              >
-                New Game
-              </button>
+              <div className="mx-auto flex w-full max-w-3xl flex-wrap items-center justify-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => initGame()}
+                  className="rounded-full bg-linear-to-r from-purple-500 to-pink-500 px-4 py-2 text-sm font-bold text-white shadow-lg transition-all hover:scale-105 active:scale-95"
+                >
+                  Reset
+                </button>
+                {(["easy", "medium", "hard"] as const).map((level) => (
+                  <button
+                    type="button"
+                    key={level}
+                    onClick={() => {
+                      setDifficulty(level);
+                      initGame(level);
+                    }}
+                    className={`rounded-full border px-3 py-2 text-sm font-bold transition-all hover:scale-105 active:scale-95 ${
+                      difficulty === level
+                        ? "border-white/40 bg-white/25 text-white"
+                        : "border-white/20 bg-white/10 text-slate-200 hover:bg-white/20"
+                    }`}
+                  >
+                    {DIFFICULTY_CONFIG[level].label}
+                  </button>
+                ))}
+              </div>
             </>
           )}
         </div>
