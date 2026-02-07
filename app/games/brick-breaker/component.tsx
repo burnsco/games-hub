@@ -25,55 +25,15 @@ interface Brick {
   glowColor: string;
 }
 
-type Difficulty = "easy" | "medium" | "hard";
-
-const DIFFICULTY_CONFIG: Record<
-  Difficulty,
-  {
-    label: string;
-    rows: number;
-    cols: number;
-    canvasWidth: number;
-    canvasHeight: number;
-    brickPadding: number;
-    brickHeight: number;
-    brickTopOffset: number;
-    brickSideOffset: number;
-  }
-> = {
-  easy: {
-    label: "Easy",
-    rows: 5,
-    cols: 8,
-    canvasWidth: 820,
-    canvasHeight: 520,
-    brickPadding: 10,
-    brickHeight: 20,
-    brickTopOffset: 50,
-    brickSideOffset: 30,
-  },
-  medium: {
-    label: "Medium",
-    rows: 7,
-    cols: 10,
-    canvasWidth: 960,
-    canvasHeight: 600,
-    brickPadding: 8,
-    brickHeight: 18,
-    brickTopOffset: 46,
-    brickSideOffset: 24,
-  },
-  hard: {
-    label: "Hard",
-    rows: 9,
-    cols: 12,
-    canvasWidth: 1100,
-    canvasHeight: 680,
-    brickPadding: 7,
-    brickHeight: 16,
-    brickTopOffset: 42,
-    brickSideOffset: 20,
-  },
+const BRICK_BREAKER_CONFIG = {
+  rows: 13,
+  cols: 18,
+  canvasWidth: 1260,
+  canvasHeight: 760,
+  brickPadding: 7,
+  brickHeight: 14,
+  brickTopOffset: 99,
+  brickSideOffset: 178,
 };
 
 const PADDLE_WIDTH = 100;
@@ -83,10 +43,10 @@ const INITIAL_BALL_SPEED = 4;
 
 export default function BrickBreakerGame() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [difficulty, setDifficulty] = useState<Difficulty>("easy");
   const [score, setScore] = useState(0);
   const [lives, setLives] = useState(3);
   const [isPlayingVisible, setIsPlayingVisible] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
   const [gameOver, setGameOver] = useState(false);
   const [gameWon, setGameWon] = useState(false);
   const [bestScore, setBestScore] = useState(0);
@@ -109,6 +69,7 @@ export default function BrickBreakerGame() {
 
   // Game state refs for stable loop
   const isPlayingRef = useRef(false);
+  const isPausedRef = useRef(false);
   const scoreRef = useRef(0);
   const bestScoreRef = useRef(bestScore);
   const livesRef = useRef(3);
@@ -117,7 +78,6 @@ export default function BrickBreakerGame() {
   const bricksRef = useRef<Brick[]>([]);
   const particlesRef = useRef<Particle[]>([]);
   const particleIdRef = useRef(0);
-  const currentDifficulty = DIFFICULTY_CONFIG[difficulty];
 
   // Sync refs with state when they change
   useEffect(() => {
@@ -139,9 +99,9 @@ export default function BrickBreakerGame() {
     const bricks: Brick[] = [];
     const brickWidth =
       (canvas.width -
-        currentDifficulty.brickSideOffset * 2 -
-        (currentDifficulty.cols - 1) * currentDifficulty.brickPadding) /
-      currentDifficulty.cols;
+        BRICK_BREAKER_CONFIG.brickSideOffset * 2 -
+        (BRICK_BREAKER_CONFIG.cols - 1) * BRICK_BREAKER_CONFIG.brickPadding) /
+      BRICK_BREAKER_CONFIG.cols;
 
     const colors = ["#ef4444", "#f97316", "#facc15", "#84cc16", "#06b6d4"];
     const glowColors = [
@@ -152,15 +112,17 @@ export default function BrickBreakerGame() {
       "rgba(6, 182, 212, 0.5)",
     ];
 
-    for (let r = 0; r < currentDifficulty.rows; r++) {
-      for (let c = 0; c < currentDifficulty.cols; c++) {
+    for (let r = 0; r < BRICK_BREAKER_CONFIG.rows; r++) {
+      for (let c = 0; c < BRICK_BREAKER_CONFIG.cols; c++) {
         bricks.push({
-          x: c * (brickWidth + currentDifficulty.brickPadding) + currentDifficulty.brickSideOffset,
+          x:
+            c * (brickWidth + BRICK_BREAKER_CONFIG.brickPadding) +
+            BRICK_BREAKER_CONFIG.brickSideOffset,
           y:
-            r * (currentDifficulty.brickHeight + currentDifficulty.brickPadding) +
-            currentDifficulty.brickTopOffset,
+            r * (BRICK_BREAKER_CONFIG.brickHeight + BRICK_BREAKER_CONFIG.brickPadding) +
+            BRICK_BREAKER_CONFIG.brickTopOffset,
           width: brickWidth,
-          height: currentDifficulty.brickHeight,
+          height: BRICK_BREAKER_CONFIG.brickHeight,
           active: true,
           color: colors[r % colors.length],
           glowColor: glowColors[r % glowColors.length],
@@ -169,7 +131,7 @@ export default function BrickBreakerGame() {
     }
     bricksRef.current = bricks;
     particlesRef.current = [];
-  }, [currentDifficulty]);
+  }, []);
 
   const startGame = () => {
     setScore(0);
@@ -178,10 +140,24 @@ export default function BrickBreakerGame() {
     livesRef.current = 3;
     setGameOver(false);
     setGameWon(false);
+    setIsPaused(false);
+    isPausedRef.current = false;
     setIsPlayingVisible(true);
     initGame();
     isPlayingRef.current = true;
     soundFXRef.current.playSelect();
+  };
+
+  const pauseGame = () => {
+    if (!isPlayingRef.current || gameOver || gameWon) return;
+    setIsPaused(true);
+    isPausedRef.current = true;
+  };
+
+  const resumeGame = () => {
+    if (!isPlayingRef.current || gameOver || gameWon) return;
+    setIsPaused(false);
+    isPausedRef.current = false;
   };
 
   useEffect(() => {
@@ -221,7 +197,7 @@ export default function BrickBreakerGame() {
         .filter((p) => p.life > 0);
 
       // 3. UPDATE GAME STATE
-      if (isPlayingRef.current) {
+      if (isPlayingRef.current && !isPausedRef.current) {
         const ball = ballRef.current;
         ball.x += ball.dx;
         ball.y += ball.dy;
@@ -274,6 +250,8 @@ export default function BrickBreakerGame() {
 
               if (bricksRef.current.every((b) => !b.active)) {
                 isPlayingRef.current = false;
+                setIsPaused(false);
+                isPausedRef.current = false;
                 setIsPlayingVisible(false);
                 setGameWon(true);
                 soundFXRef.current.playMatch();
@@ -290,6 +268,8 @@ export default function BrickBreakerGame() {
 
           if (newLives <= 0) {
             isPlayingRef.current = false;
+            setIsPaused(false);
+            isPausedRef.current = false;
             setIsPlayingVisible(false);
             setGameOver(true);
             soundFXRef.current.playGameOver();
@@ -408,29 +388,6 @@ export default function BrickBreakerGame() {
             <div className="text-3xl font-bold text-slate-300">{isClient ? bestScore : 0}</div>
             <div className="text-xs uppercase tracking-widest text-slate-400">Best</div>
           </div>
-          <div className="col-span-3 grid grid-cols-3 gap-2">
-            {(["easy", "medium", "hard"] as const).map((level) => {
-              const active = difficulty === level;
-              return (
-                <button
-                  key={level}
-                  type="button"
-                  onClick={() => {
-                    setDifficulty(level);
-                    setIsPlayingVisible(false);
-                  }}
-                  disabled={isPlayingVisible}
-                  className={`rounded-lg px-2 py-2 text-xs font-semibold uppercase tracking-wider transition ${
-                    active
-                      ? "bg-cyan-400 text-slate-900"
-                      : "bg-white/10 text-slate-200 hover:bg-white/20"
-                  } disabled:cursor-not-allowed disabled:opacity-60`}
-                >
-                  {DIFFICULTY_CONFIG[level].label}
-                </button>
-              );
-            })}
-          </div>
           <Link
             href="/"
             className="col-span-3 rounded-full border border-white/20 bg-black/40 px-4 py-2 text-center font-semibold text-white backdrop-blur-md transition-all hover:border-white/40 hover:bg-black/60"
@@ -462,30 +419,7 @@ export default function BrickBreakerGame() {
             <div className="text-4xl font-bold text-slate-300">{isClient ? bestScore : 0}</div>
             <div className="text-xs uppercase tracking-widest text-slate-400">Best</div>
           </div>
-          <div className="grid grid-cols-3 gap-2">
-            {(["easy", "medium", "hard"] as const).map((level) => {
-              const active = difficulty === level;
-              return (
-                <button
-                  key={level}
-                  type="button"
-                  onClick={() => {
-                    setDifficulty(level);
-                    setIsPlayingVisible(false);
-                  }}
-                  disabled={isPlayingVisible}
-                  className={`rounded-lg px-2 py-2 text-[10px] font-semibold uppercase tracking-wider transition ${
-                    active
-                      ? "bg-cyan-400 text-slate-900"
-                      : "bg-white/10 text-slate-200 hover:bg-white/20"
-                  } disabled:cursor-not-allowed disabled:opacity-60`}
-                >
-                  {DIFFICULTY_CONFIG[level].label}
-                </button>
-              );
-            })}
-          </div>
-          <p className="text-xs text-slate-400">Move paddle with mouse or arrow keys.</p>
+          <p className="text-xs text-slate-400">Use side lanes to arc the ball above the stack.</p>
           <Link
             href="/"
             className="inline-flex items-center justify-center rounded-full border border-white/20 bg-black/40 px-4 py-2 font-semibold text-white backdrop-blur-md transition-all hover:border-white/40 hover:bg-black/60"
@@ -494,12 +428,12 @@ export default function BrickBreakerGame() {
           </Link>
         </aside>
 
-        <div className="relative w-full max-w-[1100px] text-center">
+        <div className="relative w-full max-w-[980px] text-center">
           <canvas
             ref={canvasRef}
-            width={currentDifficulty.canvasWidth}
-            height={currentDifficulty.canvasHeight}
-            className="mx-auto h-auto w-full max-w-[1100px] rounded-2xl border-4 border-cyan-500/30 bg-black/40 shadow-2xl"
+            width={BRICK_BREAKER_CONFIG.canvasWidth}
+            height={BRICK_BREAKER_CONFIG.canvasHeight}
+            className="mx-auto h-auto w-full max-w-[980px] rounded-2xl border-4 border-cyan-500/30 bg-black/40 shadow-2xl"
           />
 
           <p className="mt-3 text-sm text-slate-500 lg:hidden">
@@ -507,13 +441,44 @@ export default function BrickBreakerGame() {
           </p>
 
           {!gameOver && !gameWon && (
-            <button
-              type="button"
-              onClick={startGame}
-              className="mt-4 rounded-full bg-linear-to-r from-cyan-500 to-blue-600 px-10 py-3 text-xl font-bold text-white shadow-lg transition-all hover:scale-105 active:scale-95"
-            >
-              {isPlayingVisible ? "Reset" : "Start Game"}
-            </button>
+            <div className="mt-4 flex flex-wrap items-center justify-center gap-3">
+              {!isPlayingVisible ? (
+                <button
+                  type="button"
+                  onClick={startGame}
+                  className="rounded-full bg-linear-to-r from-cyan-500 to-blue-600 px-10 py-3 text-xl font-bold text-white shadow-lg transition-all hover:scale-105 active:scale-95"
+                >
+                  Start Game
+                </button>
+              ) : (
+                <>
+                  <button
+                    type="button"
+                    onClick={startGame}
+                    className="rounded-full bg-linear-to-r from-cyan-500 to-blue-600 px-8 py-3 text-lg font-bold text-white shadow-lg transition-all hover:scale-105 active:scale-95"
+                  >
+                    Reset
+                  </button>
+                  {isPaused ? (
+                    <button
+                      type="button"
+                      onClick={resumeGame}
+                      className="rounded-full border border-white/30 bg-white/10 px-8 py-3 text-lg font-bold text-white shadow-lg backdrop-blur-md transition-all hover:scale-105 hover:bg-white/20 active:scale-95"
+                    >
+                      Resume
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={pauseGame}
+                      className="rounded-full border border-white/30 bg-white/10 px-8 py-3 text-lg font-bold text-white shadow-lg backdrop-blur-md transition-all hover:scale-105 hover:bg-white/20 active:scale-95"
+                    >
+                      Pause
+                    </button>
+                  )}
+                </>
+              )}
+            </div>
           )}
         </div>
       </div>
