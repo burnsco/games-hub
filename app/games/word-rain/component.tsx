@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { wordRainWords } from "@/app/data/wordRain";
+import { useSoundFX } from "../../hooks/useSoundFX";
 
 interface FallingWord {
   id: number;
@@ -37,6 +38,7 @@ export default function WordRainGame() {
   const wordIdRef = useRef(0);
   const inputRef = useRef<HTMLInputElement>(null);
   const countedWordsRef = useRef<Set<number>>(new Set());
+  const { playSelect, playError, playGameOver, playScore } = useSoundFX();
 
   const difficultySettings = useMemo(
     () =>
@@ -91,6 +93,7 @@ export default function WordRainGame() {
     setInput("");
     setGameOver(false);
     setIsPlaying(true);
+    playSelect();
     countedWordsRef.current.clear(); // Clear counted words on new game
     setTimeout(() => {
       inputRef.current?.focus();
@@ -110,6 +113,7 @@ export default function WordRainGame() {
       setScore((prev) => prev + matched.word.length * 10);
       setWords((prev) => prev.filter((w) => w.id !== matched.id));
       setInput("");
+      playScore();
     }
   };
 
@@ -139,6 +143,9 @@ export default function WordRainGame() {
             if (newLives <= 0) {
               setIsPlaying(false);
               setGameOver(true);
+              playGameOver();
+            } else {
+              playError();
             }
             return Math.max(0, newLives);
           });
@@ -150,7 +157,7 @@ export default function WordRainGame() {
     }, 16);
 
     return () => clearInterval(interval);
-  }, [isPlaying]);
+  }, [isPlaying, playError, playGameOver]);
 
   // Spawn words
   useEffect(() => {

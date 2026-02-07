@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useSoundFX } from "../../hooks/useSoundFX";
 
 interface Card {
   id: number;
@@ -37,6 +38,7 @@ export default function MemoryMatchGame() {
   const [pairs, setPairs] = useState(0);
   const [canFlip, setCanFlip] = useState(true);
   const [gameWon, setGameWon] = useState(false);
+  const { playMatch, playSelect, playError, playGameOver } = useSoundFX();
 
   // Generate shuffled cards on client-side only to avoid hydration mismatch
   useEffect(() => {
@@ -50,6 +52,7 @@ export default function MemoryMatchGame() {
     setPairs(0);
     setCanFlip(true);
     setGameWon(false);
+    playSelect();
   };
 
   const flipCard = (id: number) => {
@@ -61,6 +64,7 @@ export default function MemoryMatchGame() {
     setCards((prev) => prev.map((c) => (c.id === id ? { ...c, flipped: true } : c)));
     const newFlipped = [...flippedIds, id];
     setFlippedIds(newFlipped);
+    playSelect();
 
     if (newFlipped.length === 2) {
       setMoves((m) => m + 1);
@@ -77,7 +81,12 @@ export default function MemoryMatchGame() {
         );
         setPairs((p) => {
           const newPairs = p + 1;
-          if (newPairs === 8) setGameWon(true);
+          if (newPairs === 8) {
+            setGameWon(true);
+            playGameOver();
+          } else {
+            playMatch();
+          }
           return newPairs;
         });
         setFlippedIds([]);
@@ -90,6 +99,7 @@ export default function MemoryMatchGame() {
           );
           setFlippedIds([]);
           setCanFlip(true);
+          playError();
         }, 1000);
       }
     }

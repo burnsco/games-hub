@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useSoundFX } from "../../hooks/useSoundFX";
 
 interface Pipe {
   x: number;
@@ -27,6 +28,7 @@ export default function FlappyJumpGame() {
 
   const [isPlaying, setIsPlaying] = useState(false);
   const [gameOver, setGameOver] = useState(false);
+  const { playJump, playScore, playHit, playSelect } = useSoundFX();
 
   const createPipe = useCallback(() => {
     const canvas = canvasRef.current;
@@ -40,6 +42,7 @@ export default function FlappyJumpGame() {
   const jump = () => {
     if (isPlaying) {
       setBirdVelocity(JUMP_STRENGTH);
+      playJump();
     }
   };
 
@@ -50,6 +53,7 @@ export default function FlappyJumpGame() {
     setScore(0);
     setGameOver(false);
     setIsPlaying(true);
+    playSelect();
   };
 
   // Spawn pipes
@@ -79,6 +83,7 @@ export default function FlappyJumpGame() {
         if (newY > canvas.height - 30 - BIRD_SIZE) {
           setIsPlaying(false);
           setGameOver(true);
+          playHit();
           return y;
         }
 
@@ -100,6 +105,7 @@ export default function FlappyJumpGame() {
             if (birdY - BIRD_SIZE < newPipe.top || birdY + BIRD_SIZE > newPipe.top + PIPE_GAP) {
               setIsPlaying(false);
               setGameOver(true);
+              playHit();
             }
           }
 
@@ -114,6 +120,7 @@ export default function FlappyJumpGame() {
               }
               return newScore;
             });
+            playScore();
           }
 
           return newPipe;
@@ -124,7 +131,7 @@ export default function FlappyJumpGame() {
     }, 16);
 
     return () => clearInterval(interval);
-  }, [isPlaying, birdVelocity, birdY, bestScore]);
+  }, [isPlaying, birdVelocity, birdY, bestScore, playHit, playScore]);
 
   // Controls
   useEffect(() => {

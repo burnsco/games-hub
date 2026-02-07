@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useSoundFX } from "../../hooks/useSoundFX";
 
 interface Point {
   x: number;
@@ -29,6 +30,7 @@ export default function SnakeGame() {
   const [gameOver, setGameOver] = useState(false);
   const [gameSpeed, setGameSpeed] = useState(150);
   const directionRef = useRef(direction);
+  const { playEat, playHit, playSelect, playGameOver } = useSoundFX();
 
   useEffect(() => {
     directionRef.current = direction;
@@ -59,6 +61,7 @@ export default function SnakeGame() {
     setGameSpeed(150);
     setGameOver(false);
     setIsPlaying(true);
+    playSelect();
   };
 
   // Game loop
@@ -76,6 +79,8 @@ export default function SnakeGame() {
         if (head.x < 0 || head.x >= GRID_SIZE || head.y < 0 || head.y >= GRID_SIZE) {
           setIsPlaying(false);
           setGameOver(true);
+          playHit();
+          playGameOver();
           return prevSnake;
         }
 
@@ -83,6 +88,8 @@ export default function SnakeGame() {
         if (prevSnake.some((s) => s.x === head.x && s.y === head.y)) {
           setIsPlaying(false);
           setGameOver(true);
+          playHit();
+          playGameOver();
           return prevSnake;
         }
 
@@ -100,6 +107,7 @@ export default function SnakeGame() {
           });
           setFood(spawnFood(newSnake));
           setGameSpeed((s) => Math.max(50, s - 5));
+          playEat();
         } else {
           newSnake.pop();
         }
@@ -109,7 +117,7 @@ export default function SnakeGame() {
     }, gameSpeed);
 
     return () => clearInterval(interval);
-  }, [isPlaying, food, gameSpeed, bestScore, spawnFood]);
+  }, [isPlaying, food, gameSpeed, bestScore, spawnFood, playEat, playHit, playGameOver]);
 
   // Controls
   useEffect(() => {

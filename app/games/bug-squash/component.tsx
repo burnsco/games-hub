@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useSoundFX } from "../../hooks/useSoundFX";
 
 interface Bug {
   id: number;
@@ -15,6 +16,17 @@ interface Bug {
   squashedAt?: number;
 }
 
+interface Particle {
+  id: number;
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  color: string;
+  size: number;
+  life: number;
+}
+
 export default function BugSquashGame() {
   const [score, setScore] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -22,6 +34,9 @@ export default function BugSquashGame() {
   const [speedMultiplier, setSpeedMultiplier] = useState(1);
   const containerRef = useRef<HTMLDivElement>(null);
   const bugIdRef = useRef(0);
+  const [particles, setParticles] = useState<Particle[]>([]);
+  const particleIdRef = useRef(0);
+  const { playSquash, playSelect, playGameOver } = useSoundFX();
 
   const createBug = useCallback(() => {
     const bugEmojis = ["🪲", "🐛", "🐜", "🪳", "🦗", "🕷️"];
@@ -72,7 +87,23 @@ export default function BugSquashGame() {
       prev.map((b) => (b.id === id ? { ...b, squashed: true, squashedAt: Date.now() } : b)),
     );
     setScore((prev) => prev + 1);
-    playSquashSound();
+    playSquash();
+
+    // Create explosion particles
+    const bug = bugs.find((b) => b.id === id);
+    if (bug) {
+      const newParticles: Particle[] = Array.from({ length: 8 }).map(() => ({
+        id: particleIdRef.current++,
+        x: bug.x + bug.size / 2,
+        y: bug.y + bug.size / 2,
+        vx: (Math.random() - 0.5) * 10,
+        vy: (Math.random() - 0.5) * 10,
+        color: ["#ef4444", "#f97316", "#facc15", "#84cc16"][Math.floor(Math.random() * 4)],
+        size: Math.random() * 10 + 5,
+        life: 1.0,
+      }));
+      setParticles((prev) => [...prev, ...newParticles]);
+    }
   };
 
   const startGame = () => {
@@ -80,11 +111,13 @@ export default function BugSquashGame() {
     setBugs([]);
     setSpeedMultiplier(1);
     setIsPlaying(true);
+    playSelect();
   };
 
   const stopGame = () => {
     setIsPlaying(false);
     setBugs([]);
+    playGameOver();
   };
 
   // Spawn bugs
@@ -130,6 +163,16 @@ export default function BugSquashGame() {
 
     const frame = requestAnimationFrame(function loop() {
       animate();
+      setParticles((prev) =>
+        prev
+          .map((p) => ({
+            ...p,
+            x: p.x + p.vx,
+            y: p.y + p.vy,
+            life: p.life - 0.05,
+          }))
+          .filter((p) => p.life > 0),
+      );
       if (isPlaying) requestAnimationFrame(loop);
     });
 
@@ -145,34 +188,6 @@ export default function BugSquashGame() {
     }, 100);
     return () => clearInterval(interval);
   }, [isPlaying]);
-
-  const playSquashSound = () => {
-    try {
-      const AudioContext =
-        window.AudioContext ||
-        (
-          window as unknown as {
-            webkitAudioContext: typeof window.AudioContext;
-          }
-        ).webkitAudioContext;
-      const ctx = new AudioContext();
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-
-      osc.type = "sawtooth";
-      osc.frequency.value = 180;
-      gain.gain.value = 0.08;
-
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.start();
-      gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.12);
-      osc.stop(ctx.currentTime + 0.12);
-      osc.onended = () => ctx.close();
-    } catch {
-      // Audio not available or blocked
-    }
-  };
 
   return (
     <div
@@ -220,6 +235,23 @@ export default function BugSquashGame() {
           </div>
         </div>
       )}
+
+      {/* Particles */}
+      {particles.map((p) => (
+        <div
+          key={p.id}
+          className="pointer-events-none absolute rounded-full"
+          style={{
+            left: p.x,
+            top: p.y,
+            width: p.size,
+            height: p.size,
+            backgroundColor: p.color,
+            opacity: p.life,
+            transform: `scale(${p.life})`,
+          }}
+        />
+      ))}
 
       {/* Bugs */}
       {bugs.map((bug) => (

@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useSoundFX } from "../../hooks/useSoundFX";
 
 const PADDLE_WIDTH = 10;
 const PADDLE_HEIGHT = 80;
@@ -17,6 +18,7 @@ export default function PongGame() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [result, setResult] = useState<"win" | "lose" | null>(null);
   const keysRef = useRef<{ [key: string]: boolean }>({});
+  const { playBlip, playScore, playError, playGameOver, playSelect } = useSoundFX();
 
   const resetBall = useCallback(
     () => ({
@@ -36,6 +38,7 @@ export default function PongGame() {
     setAiScore(0);
     setResult(null);
     setIsPlaying(true);
+    playSelect();
   };
 
   // Controls
@@ -88,6 +91,7 @@ export default function PongGame() {
         // Top/bottom collision
         if (newBall.y <= BALL_SIZE || newBall.y >= canvas.height - BALL_SIZE) {
           newBall.speedY = -newBall.speedY;
+          playBlip(220);
         }
 
         // Player paddle collision
@@ -98,6 +102,7 @@ export default function PongGame() {
         ) {
           newBall.speedX = Math.abs(newBall.speedX) * 1.05;
           newBall.speedY += (newBall.y - (playerY + PADDLE_HEIGHT / 2)) * 0.1;
+          playBlip(440);
         }
 
         // AI paddle collision
@@ -108,6 +113,7 @@ export default function PongGame() {
         ) {
           newBall.speedX = -Math.abs(newBall.speedX) * 1.05;
           newBall.speedY += (newBall.y - (aiY + PADDLE_HEIGHT / 2)) * 0.1;
+          playBlip(330);
         }
 
         // Scoring
@@ -117,6 +123,9 @@ export default function PongGame() {
             if (newScore >= WINNING_SCORE) {
               setIsPlaying(false);
               setResult("lose");
+              playGameOver();
+            } else {
+              playError();
             }
             return newScore;
           });
@@ -128,6 +137,9 @@ export default function PongGame() {
             if (newScore >= WINNING_SCORE) {
               setIsPlaying(false);
               setResult("win");
+              playGameOver();
+            } else {
+              playScore();
             }
             return newScore;
           });
@@ -139,7 +151,7 @@ export default function PongGame() {
     }, 16);
 
     return () => clearInterval(interval);
-  }, [isPlaying, playerY, aiY, resetBall]);
+  }, [isPlaying, playerY, aiY, resetBall, playBlip, playScore, playError, playGameOver]);
 
   // Draw
   useEffect(() => {
