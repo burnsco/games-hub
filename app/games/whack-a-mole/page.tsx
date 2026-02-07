@@ -1,15 +1,11 @@
 import BackButton from "../../components/BackButton";
-import ComingSoon from "../../components/ComingSoon";
+import WhackAMoleGame from "./component";
 
 export default function Page() {
   return (
     <>
       <BackButton />
-      <ComingSoon
-        title="Whack-a-Mole"
-        emoji="🐹"
-        description="Whack the moles before they disappear under cover."
-      />
+      <WhackAMoleGame />
     </>
   );
 }
