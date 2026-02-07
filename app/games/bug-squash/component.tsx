@@ -6,6 +6,8 @@ import { useSoundFX } from "../../hooks/useSoundFX";
 interface Bug {
   id: number;
   emoji: string;
+  type: string;
+  points: number;
   x: number;
   y: number;
   targetX: number;
@@ -27,8 +29,58 @@ interface Particle {
   life: number;
 }
 
+const BUG_TYPES = [
+  {
+    type: "Crawler",
+    emoji: "🐛",
+    points: 50,
+    speedMin: 0.8,
+    speedMax: 1.3,
+    sizeMin: 40,
+    sizeMax: 56,
+  },
+  { type: "Ant", emoji: "🐜", points: 100, speedMin: 1.3, speedMax: 1.9, sizeMin: 34, sizeMax: 48 },
+  {
+    type: "Beetle",
+    emoji: "🪲",
+    points: 150,
+    speedMin: 1.9,
+    speedMax: 2.5,
+    sizeMin: 32,
+    sizeMax: 46,
+  },
+  {
+    type: "Cockroach",
+    emoji: "🪳",
+    points: 220,
+    speedMin: 2.5,
+    speedMax: 3.2,
+    sizeMin: 30,
+    sizeMax: 44,
+  },
+  {
+    type: "Cricket",
+    emoji: "🦗",
+    points: 320,
+    speedMin: 3.2,
+    speedMax: 3.9,
+    sizeMin: 28,
+    sizeMax: 42,
+  },
+  {
+    type: "Spider",
+    emoji: "🕷️",
+    points: 450,
+    speedMin: 3.9,
+    speedMax: 4.8,
+    sizeMin: 26,
+    sizeMax: 40,
+  },
+] as const;
+
 export default function BugSquashGame() {
   const [score, setScore] = useState(0);
+  const [smashedCount, setSmashedCount] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [bugs, setBugs] = useState<Bug[]>([]);
   const [speedMultiplier, setSpeedMultiplier] = useState(1);
@@ -39,10 +91,9 @@ export default function BugSquashGame() {
   const { playSquash, playSelect, playGameOver } = useSoundFX();
 
   const createBug = useCallback(() => {
-    const bugEmojis = ["🪲", "🐛", "🐜", "🪳", "🦗", "🕷️"];
-
     if (!containerRef.current) return;
     const rect = containerRef.current.getBoundingClientRect();
+    const bugType = BUG_TYPES[Math.floor(Math.random() * BUG_TYPES.length)];
 
     const edge = Math.floor(Math.random() * 4);
     let x = 0,
@@ -69,13 +120,17 @@ export default function BugSquashGame() {
 
     const newBug: Bug = {
       id: bugIdRef.current++,
-      emoji: bugEmojis[Math.floor(Math.random() * bugEmojis.length)],
+      emoji: bugType.emoji,
+      type: bugType.type,
+      points: bugType.points,
       x,
       y,
       targetX: Math.random() * rect.width,
       targetY: Math.random() * rect.height,
-      speed: (1 + Math.random() * 2) * speedMultiplier,
-      size: Math.random() * 40 + 30,
+      speed:
+        (bugType.speedMin + Math.random() * (bugType.speedMax - bugType.speedMin)) *
+        speedMultiplier,
+      size: Math.random() * (bugType.sizeMax - bugType.sizeMin) + bugType.sizeMin,
       squashed: false,
     };
 
@@ -83,31 +138,33 @@ export default function BugSquashGame() {
   }, [speedMultiplier]);
 
   const squashBug = (id: number) => {
+    const hitBug = bugs.find((b) => b.id === id);
+    if (!hitBug || hitBug.squashed) return;
+
     setBugs((prev) =>
       prev.map((b) => (b.id === id ? { ...b, squashed: true, squashedAt: Date.now() } : b)),
     );
-    setScore((prev) => prev + 1);
+
+    setSmashedCount((prev) => prev + 1);
+    setScore((prev) => prev + hitBug.points);
     playSquash();
 
-    // Create explosion particles
-    const bug = bugs.find((b) => b.id === id);
-    if (bug) {
-      const newParticles: Particle[] = Array.from({ length: 8 }).map(() => ({
-        id: particleIdRef.current++,
-        x: bug.x + bug.size / 2,
-        y: bug.y + bug.size / 2,
-        vx: (Math.random() - 0.5) * 10,
-        vy: (Math.random() - 0.5) * 10,
-        color: ["#ef4444", "#f97316", "#facc15", "#84cc16"][Math.floor(Math.random() * 4)],
-        size: Math.random() * 10 + 5,
-        life: 1.0,
-      }));
-      setParticles((prev) => [...prev, ...newParticles]);
-    }
+    const newParticles: Particle[] = Array.from({ length: 8 }).map(() => ({
+      id: particleIdRef.current++,
+      x: hitBug.x + hitBug.size / 2,
+      y: hitBug.y + hitBug.size / 2,
+      vx: (Math.random() - 0.5) * 10,
+      vy: (Math.random() - 0.5) * 10,
+      color: ["#ef4444", "#f97316", "#facc15", "#84cc16"][Math.floor(Math.random() * 4)],
+      size: Math.random() * 10 + 5,
+      life: 1.0,
+    }));
+    setParticles((prev) => [...prev, ...newParticles]);
   };
 
   const startGame = () => {
     setScore(0);
+    setSmashedCount(0);
     setBugs([]);
     setSpeedMultiplier(1);
     setIsPlaying(true);
@@ -202,12 +259,26 @@ export default function BugSquashGame() {
       {/* Score */}
       {isPlaying && (
         <div className="pointer-events-none absolute left-1/2 top-8 z-0 -translate-x-1/2 text-center">
-          <div className="bg-linear-to-b from-blue-400 to-violet-600 bg-clip-text text-8xl font-black text-transparent">
+          <div className="bg-linear-to-b from-blue-400 to-violet-600 bg-clip-text text-7xl font-black text-transparent">
             {score}
           </div>
-          <div className="text-xl font-bold uppercase tracking-widest text-slate-400">
-            Bugs Smashed
-          </div>
+          <div className="text-xl font-bold uppercase tracking-widest text-slate-400">Score</div>
+          <div className="text-lg font-semibold text-slate-300">Bugs Smashed: {smashedCount}</div>
+        </div>
+      )}
+
+      {isPlaying && (
+        <div className="pointer-events-none absolute right-4 top-20 z-10 rounded-xl border border-white/10 bg-black/30 p-3 text-right backdrop-blur-sm">
+          <div className="mb-1 text-xs uppercase tracking-wider text-slate-400">Bug Values</div>
+          {BUG_TYPES.map((bug) => (
+            <div
+              key={bug.type}
+              className="flex items-center justify-end gap-2 text-sm text-slate-200"
+            >
+              <span>{bug.emoji}</span>
+              <span>{bug.points} pts</span>
+            </div>
+          ))}
         </div>
       )}
 
@@ -268,7 +339,7 @@ export default function BugSquashGame() {
             fontSize: bug.size,
             transform: `rotate(${(Math.atan2(bug.targetY - bug.y, bug.targetX - bug.x) * 180) / Math.PI + 90}deg)`,
           }}
-          aria-label={`Bug ${bug.id}`}
+          aria-label={`${bug.type} bug worth ${bug.points} points`}
         >
           <span
             className={`block transition-all duration-200 ${
