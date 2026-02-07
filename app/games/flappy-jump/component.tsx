@@ -214,10 +214,6 @@ export default function FlappyJumpGame() {
       </div>
 
       <div className="text-center">
-        <h1 className="mb-3 text-3xl font-black text-white drop-shadow-lg md:text-4xl">
-          🐦 Flappy Jump
-        </h1>
-
         <canvas
           ref={canvasRef}
           width={360}

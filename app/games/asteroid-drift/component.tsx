@@ -495,7 +495,7 @@ export default function AsteroidDriftGame() {
   }, [startGame]);
 
   return (
-    <div className="relative flex h-screen w-full items-center justify-center bg-slate-950 overflow-hidden">
+    <div className="relative flex h-[calc(100dvh-73px)] w-full items-center justify-center overflow-hidden bg-slate-950">
       {/* Background stars (static for performance) */}
       <div
         className="absolute inset-0 opacity-50"
@@ -526,12 +526,6 @@ export default function AsteroidDriftGame() {
           </div>
           <div className="text-xs uppercase tracking-widest text-slate-400">High Score</div>
         </div>
-      </div>
-
-      <div className="absolute top-4 left-4 z-20">
-        <h1 className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-slate-400 to-indigo-500">
-          ☄️ Asteroid Drift
-        </h1>
       </div>
 
       <div className="relative">

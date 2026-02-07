@@ -192,7 +192,7 @@ export default function BugSquashGame() {
   return (
     <div
       ref={containerRef}
-      className="bg-linear-to-br relative h-screen w-full overflow-hidden from-slate-900 via-slate-800 to-slate-900"
+      className="bg-linear-to-br relative h-[calc(100dvh-73px)] w-full overflow-hidden from-slate-900 via-slate-800 to-slate-900"
       style={{ cursor: isPlaying ? "crosshair" : "default" }}
     >
       {/* Background glow */}
@@ -201,7 +201,7 @@ export default function BugSquashGame() {
 
       {/* Score */}
       {isPlaying && (
-        <div className="absolute left-1/2 top-8 z-20 -translate-x-1/2 text-center">
+        <div className="pointer-events-none absolute left-1/2 top-8 z-0 -translate-x-1/2 text-center">
           <div className="bg-linear-to-b from-blue-400 to-violet-600 bg-clip-text text-8xl font-black text-transparent">
             {score}
           </div>

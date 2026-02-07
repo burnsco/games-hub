@@ -197,7 +197,7 @@ export default function PongGame() {
   }, [playerY, aiY, ball]);
 
   return (
-    <div className="relative flex h-screen w-full items-center justify-center bg-linear-to-br from-slate-900 via-gray-900 to-slate-800">
+    <div className="relative flex h-[calc(100dvh-73px)] w-full items-center justify-center overflow-hidden bg-linear-to-br from-slate-900 via-gray-900 to-slate-800">
       {/* Scores */}
       <div className="absolute left-1/2 top-4 z-20 flex -translate-x-1/2 gap-16 text-center">
         <div>
@@ -211,10 +211,6 @@ export default function PongGame() {
       </div>
 
       <div className="text-center">
-        <h1 className="mb-6 bg-linear-to-r from-cyan-400 to-blue-500 bg-clip-text text-4xl font-black text-transparent">
-          🏓 Pong
-        </h1>
-
         <canvas
           ref={canvasRef}
           width={600}
@@ -235,7 +231,7 @@ export default function PongGame() {
 
       {/* Result */}
       {result && (
-        <div className="fixed inset-0 z-30 flex items-center justify-center bg-slate-900/90 backdrop-blur-sm">
+        <div className="absolute inset-0 z-30 flex items-center justify-center bg-slate-900/90 backdrop-blur-sm">
           <div className="text-center">
             <h1
               className={`bg-linear-to-r bg-clip-text text-6xl font-black text-transparent ${result === "win" ? "from-green-400 to-emerald-500" : "from-red-400 to-orange-500"} mb-4`}

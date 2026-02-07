@@ -390,7 +390,7 @@ export default function TetrisGame() {
   };
 
   return (
-    <div className="flex min-h-screen w-full flex-col items-center justify-center bg-slate-950 font-sans p-4">
+    <div className="flex h-[calc(100dvh-73px)] w-full flex-col items-center justify-center overflow-hidden bg-slate-950 p-2 font-sans md:p-4">
       <div className="flex gap-8 items-start">
         {/* Left Column: Hold/Stats */}
         <div className="hidden md:flex flex-col gap-4">
@@ -467,7 +467,7 @@ export default function TetrisGame() {
         </div>
       </div>
 
-      <div className="mt-8 text-slate-500 text-sm">
+      <div className="mt-3 text-xs text-slate-500 md:mt-6 md:text-sm">
         Use <b>Arrows</b> to move/rotate • <b>Space</b> to drop
       </div>
 

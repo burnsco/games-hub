@@ -216,7 +216,7 @@ export default function WordRainGame() {
   }, [gameOver, score, difficulty]);
 
   return (
-    <div className="relative h-screen w-full overflow-hidden bg-linear-to-b from-slate-900 via-indigo-950 to-slate-900">
+    <div className="relative h-[calc(100dvh-73px)] w-full overflow-hidden bg-linear-to-b from-slate-900 via-indigo-950 to-slate-900">
       {/* Stars */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         {stars.map((star) => (
@@ -288,7 +288,7 @@ export default function WordRainGame() {
         <div className="absolute inset-0 z-30 flex items-center justify-center bg-slate-900/90 backdrop-blur-sm">
           <div className="w-90 rounded-2xl border border-white/10 bg-white/5 p-8 text-center backdrop-blur-md">
             <h1 className="mb-4 bg-linear-to-r from-cyan-400 to-blue-500 bg-clip-text text-6xl font-black text-transparent">
-              {gameOver ? "Game Over!" : "🌧️ WordRain"}
+              {gameOver ? "Game Over!" : "Get Ready"}
             </h1>
             {gameOver && <p className="mb-8 text-6xl font-black text-white">{score}</p>}
             <p className="mb-6 text-lg text-slate-400">

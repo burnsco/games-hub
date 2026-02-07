@@ -327,65 +327,88 @@ export default function BrickBreakerGame() {
   }, []);
 
   return (
-    <div className="relative flex h-screen w-full items-center justify-center bg-linear-to-br from-slate-900 via-gray-900 to-slate-950">
-      {/* Background glow - Static (removed pulse to eliminate potential flickering) */}
+    <div className="relative flex h-[calc(100dvh-73px)] w-full items-center justify-center overflow-hidden bg-linear-to-br from-slate-900 via-gray-900 to-slate-950 px-4 py-4">
       <div className="absolute left-[-10%] top-[-10%] h-[50%] w-[50%] rounded-full bg-cyan-600/10 blur-[120px]" />
       <div className="absolute bottom-[-10%] right-[-10%] h-[50%] w-[50%] rounded-full bg-blue-600/10 blur-[120px]" />
 
-      {/* Stats */}
-      <div className="absolute left-1/2 top-4 z-20 flex -translate-x-1/2 gap-16 text-center">
-        <div>
-          <div className="text-4xl font-bold text-white drop-shadow-lg">{score}</div>
-          <div className="text-xs uppercase tracking-widest text-slate-400">Score</div>
-        </div>
-        <div>
-          <div className="flex gap-1">
-            {[...Array(3)].map((_, i) => (
-              <span
-                // biome-ignore lint/suspicious/noArrayIndexKey: fixed size array
-                key={i}
-                className={`text-2xl transition-all ${i >= lives ? "scale-75 opacity-20 grayscale" : ""}`}
-              >
-                ❤️
-              </span>
-            ))}
+      <div className="relative z-10 mx-auto flex w-full max-w-[1280px] flex-col items-center gap-4 lg:flex-row lg:items-start lg:gap-6">
+        <aside className="grid w-full max-w-[860px] grid-cols-3 gap-3 text-center lg:hidden">
+          <div className="rounded-xl border border-white/10 bg-white/5 p-3">
+            <div className="text-3xl font-bold text-white">{score}</div>
+            <div className="text-xs uppercase tracking-widest text-slate-400">Score</div>
           </div>
-          <div className="text-xs uppercase tracking-widest text-slate-400">Lives</div>
-        </div>
-        <div>
-          <div className="text-4xl font-bold text-slate-400">{isClient ? bestScore : 0}</div>
-          <div className="text-xs uppercase tracking-widest text-slate-400">Best</div>
+          <div className="rounded-xl border border-white/10 bg-white/5 p-3">
+            <div className="flex justify-center gap-1">
+              {[...Array(3)].map((_, i) => (
+                <span
+                  // biome-ignore lint/suspicious/noArrayIndexKey: fixed size array
+                  key={i}
+                  className={`text-xl transition-all ${i >= lives ? "scale-75 opacity-20 grayscale" : ""}`}
+                >
+                  ❤️
+                </span>
+              ))}
+            </div>
+            <div className="text-xs uppercase tracking-widest text-slate-400">Lives</div>
+          </div>
+          <div className="rounded-xl border border-white/10 bg-white/5 p-3">
+            <div className="text-3xl font-bold text-slate-300">{isClient ? bestScore : 0}</div>
+            <div className="text-xs uppercase tracking-widest text-slate-400">Best</div>
+          </div>
+        </aside>
+
+        <aside className="hidden w-52 shrink-0 space-y-3 rounded-2xl border border-white/10 bg-white/5 p-4 text-center backdrop-blur-sm lg:block">
+          <div className="rounded-xl border border-white/10 bg-black/20 p-3">
+            <div className="text-4xl font-bold text-white">{score}</div>
+            <div className="text-xs uppercase tracking-widest text-slate-400">Score</div>
+          </div>
+          <div className="rounded-xl border border-white/10 bg-black/20 p-3">
+            <div className="mb-1 flex justify-center gap-1">
+              {[...Array(3)].map((_, i) => (
+                <span
+                  // biome-ignore lint/suspicious/noArrayIndexKey: fixed size array
+                  key={i}
+                  className={`text-2xl transition-all ${i >= lives ? "scale-75 opacity-20 grayscale" : ""}`}
+                >
+                  ❤️
+                </span>
+              ))}
+            </div>
+            <div className="text-xs uppercase tracking-widest text-slate-400">Lives</div>
+          </div>
+          <div className="rounded-xl border border-white/10 bg-black/20 p-3">
+            <div className="text-4xl font-bold text-slate-300">{isClient ? bestScore : 0}</div>
+            <div className="text-xs uppercase tracking-widest text-slate-400">Best</div>
+          </div>
+          <p className="text-xs text-slate-400">Move paddle with mouse or arrow keys.</p>
+        </aside>
+
+        <div className="relative w-full max-w-[860px] text-center">
+          <canvas
+            ref={canvasRef}
+            width={820}
+            height={520}
+            className="mx-auto w-full max-w-[860px] rounded-2xl border-4 border-cyan-500/30 bg-black/40 shadow-2xl"
+          />
+
+          <p className="mt-3 text-sm text-slate-500 lg:hidden">
+            Use Mouse or Arrows to move paddle
+          </p>
+
+          {!isPlayingVisible && !gameOver && !gameWon && (
+            <button
+              type="button"
+              onClick={startGame}
+              className="mt-4 rounded-full bg-linear-to-r from-cyan-500 to-blue-600 px-10 py-3 text-xl font-bold text-white shadow-lg transition-all hover:scale-105 active:scale-95"
+            >
+              Start Game
+            </button>
+          )}
         </div>
       </div>
 
-      <div className="text-center">
-        <h1 className="mb-6 bg-linear-to-r from-cyan-400 to-blue-500 bg-clip-text text-4xl font-black text-transparent">
-          🧱 Brick Breaker
-        </h1>
-
-        <canvas
-          ref={canvasRef}
-          width={600}
-          height={400}
-          className="rounded-2xl border-4 border-cyan-500/30 bg-black/40 shadow-2xl"
-        />
-
-        <p className="mt-4 text-slate-500">Use Mouse or Arrows to move paddle</p>
-
-        {!isPlayingVisible && !gameOver && !gameWon && (
-          <button
-            type="button"
-            onClick={startGame}
-            className="mt-6 rounded-full bg-linear-to-r from-cyan-500 to-blue-600 px-10 py-3 text-xl font-bold text-white shadow-lg transition-all hover:scale-105 active:scale-95"
-          >
-            Start Game
-          </button>
-        )}
-      </div>
-
-      {/* Screens */}
       {(gameOver || gameWon) && (
-        <div className="fixed inset-0 z-30 flex items-center justify-center bg-slate-950/90 backdrop-blur-md">
+        <div className="absolute inset-0 z-30 flex items-center justify-center bg-slate-950/90 backdrop-blur-md">
           <div className="text-center">
             <h1
               className={`mb-4 text-6xl font-black ${gameWon ? "bg-linear-to-r from-green-400 to-emerald-500" : "bg-linear-to-r from-red-400 to-orange-500"} bg-clip-text text-transparent`}

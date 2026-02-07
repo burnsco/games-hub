@@ -106,7 +106,7 @@ export default function MemoryMatchGame() {
   };
 
   return (
-    <div className="relative min-h-screen w-full bg-linear-to-br from-purple-900 via-indigo-900 to-slate-900 p-8">
+    <div className="relative h-[calc(100dvh-73px)] w-full overflow-hidden bg-linear-to-br from-purple-900 via-indigo-900 to-slate-900 p-4 md:p-8">
       {/* Stats */}
       <div className="absolute right-4 top-4 z-20 text-right">
         <div className="text-2xl font-bold text-white">Moves: {moves}</div>
@@ -114,12 +114,8 @@ export default function MemoryMatchGame() {
       </div>
 
       {/* Game Container */}
-      <div className="flex min-h-screen items-center justify-center">
+      <div className="flex h-full items-center justify-center">
         <div className="text-center">
-          <h1 className="mb-8 bg-linear-to-r from-purple-400 to-pink-500 bg-clip-text text-4xl font-black text-transparent">
-            🧠 Memory Match
-          </h1>
-
           {/* Game Grid */}
           <div className="mx-auto mb-8 grid max-w-md grid-cols-4 gap-4">
             {cards.map((card) => (
@@ -178,7 +174,7 @@ export default function MemoryMatchGame() {
 
       {/* Win Screen */}
       {gameWon && (
-        <div className="fixed inset-0 z-30 flex items-center justify-center bg-slate-900/90 backdrop-blur-sm">
+        <div className="absolute inset-0 z-30 flex items-center justify-center bg-slate-900/90 backdrop-blur-sm">
           <div className="text-center">
             <h1 className="mb-4 bg-linear-to-r from-yellow-400 to-orange-500 bg-clip-text text-6xl font-black text-transparent">
               🎉 You Win!

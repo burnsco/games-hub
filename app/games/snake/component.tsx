@@ -215,7 +215,7 @@ export default function SnakeGame() {
   }, [snake, food]);
 
   return (
-    <div className="relative flex h-screen w-full items-center justify-center bg-linear-to-br from-green-900 via-emerald-900 to-slate-900">
+    <div className="relative flex h-[calc(100dvh-73px)] w-full items-center justify-center overflow-hidden bg-linear-to-br from-green-900 via-emerald-900 to-slate-900">
       {/* Score */}
       <div className="absolute right-4 top-4 z-20 text-right">
         <div className="text-3xl font-bold text-white">Score: {score}</div>
@@ -223,10 +223,6 @@ export default function SnakeGame() {
       </div>
 
       <div className="text-center">
-        <h1 className="mb-6 bg-linear-to-r from-green-400 to-emerald-500 bg-clip-text text-4xl font-black text-transparent">
-          🐍 Snake
-        </h1>
-
         <canvas
           ref={canvasRef}
           width={400}
@@ -247,7 +243,7 @@ export default function SnakeGame() {
 
       {/* Game Over */}
       {gameOver && (
-        <div className="fixed inset-0 z-30 flex items-center justify-center bg-slate-900/90 backdrop-blur-sm">
+        <div className="absolute inset-0 z-30 flex items-center justify-center bg-slate-900/90 backdrop-blur-sm">
           <div className="text-center">
             <h1 className="mb-4 bg-linear-to-r from-red-400 to-orange-500 bg-clip-text text-6xl font-black text-transparent">
               Game Over!

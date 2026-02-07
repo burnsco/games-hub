@@ -365,15 +365,12 @@ export default function ColorSwitchGame() {
   }, [jump]);
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-linear-to-b from-slate-950 via-indigo-950 to-slate-950 px-4 py-10">
+    <div className="relative flex h-[calc(100dvh-73px)] items-center justify-center overflow-hidden bg-linear-to-b from-slate-950 via-indigo-950 to-slate-950 px-4 py-4">
       <div className="pointer-events-none absolute left-[-10%] top-[-10%] h-[45%] w-[45%] rounded-full bg-fuchsia-500/10 blur-[140px]" />
       <div className="pointer-events-none absolute bottom-[-10%] right-[-10%] h-[45%] w-[45%] rounded-full bg-cyan-500/10 blur-[140px]" />
 
       <div className="relative z-10 w-full max-w-2xl">
         <div className="mb-6 text-center">
-          <h1 className="bg-linear-to-r from-fuchsia-400 via-cyan-300 to-emerald-300 bg-clip-text text-5xl font-black text-transparent">
-            Color Switch
-          </h1>
           <p className="mt-2 text-slate-300">
             Jump through matching segments and survive as long as possible.
           </p>
@@ -395,7 +392,7 @@ export default function ColorSwitchGame() {
             ref={canvasRef}
             width={GAME_WIDTH}
             height={GAME_HEIGHT}
-            className="block h-auto w-full cursor-pointer"
+            className="block h-auto max-h-[72dvh] w-full cursor-pointer"
             onClick={jump}
           />
 

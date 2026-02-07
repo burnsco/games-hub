@@ -184,13 +184,13 @@ export default function WhackAMoleGame() {
   };
 
   return (
-    <div className="relative flex min-h-screen w-full items-start justify-center bg-linear-to-br from-slate-950 via-gray-900 to-slate-950 overflow-y-auto pt-16 pb-20 sm:items-center sm:pt-0 sm:pb-0">
+    <div className="relative flex h-[calc(100dvh-73px)] w-full items-center justify-center overflow-hidden bg-linear-to-br from-slate-950 via-gray-900 to-slate-950 px-2">
       {/* Background glow */}
       <div className="absolute left-[-10%] top-[-10%] h-[50%] w-[50%] rounded-full bg-purple-600/10 blur-[120px]" />
       <div className="absolute bottom-[-10%] right-[-10%] h-[50%] w-[50%] rounded-full bg-cyan-600/10 blur-[120px]" />
 
       {/* Particles Layer */}
-      <div className="pointer-events-none fixed inset-0 z-50">
+      <div className="pointer-events-none absolute inset-0 z-50">
         {particles.map((p) => (
           <div
             key={p.id}
@@ -209,11 +209,7 @@ export default function WhackAMoleGame() {
         ))}
       </div>
 
-      <div className="z-10 text-center px-4">
-        <h1 className="mb-4 bg-linear-to-r from-purple-400 to-cyan-400 bg-clip-text text-3xl sm:text-5xl font-black text-transparent uppercase tracking-tighter">
-          Whack-A-Mole.exe
-        </h1>
-
+      <div className="z-10 px-4 text-center">
         <div className="mb-6 flex justify-center gap-6 sm:gap-12">
           <div className="text-center">
             <div className="text-2xl sm:text-4xl font-black text-white">{score}</div>
@@ -287,7 +283,7 @@ export default function WhackAMoleGame() {
 
       {/* End Screen */}
       {gameOver && (
-        <div className="fixed inset-0 z-100 flex items-center justify-center bg-slate-950/90 backdrop-blur-xl">
+        <div className="absolute inset-0 z-100 flex items-center justify-center bg-slate-950/90 backdrop-blur-xl">
           <div className="text-center p-12 rounded-3xl border-4 border-purple-500/20 bg-slate-900/50 shadow-2xl">
             <h2 className="mb-2 text-6xl font-black text-white uppercase tracking-tighter">
               Mission Over
