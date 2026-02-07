@@ -21,6 +21,7 @@ export default function WordRainGame() {
   const [words, setWords] = useState<FallingWord[]>([]);
   const [input, setInput] = useState("");
   const [difficulty, setDifficulty] = useState<"easy" | "medium" | "hard">("medium");
+  const [paceMultiplier, setPaceMultiplier] = useState(1);
   const [highScores, setHighScores] = useState<{
     easy: number;
     medium: number;
@@ -92,6 +93,7 @@ export default function WordRainGame() {
     setWords([]);
     setInput("");
     setGameOver(false);
+    setPaceMultiplier(1);
     setIsPlaying(true);
     playSelect();
     countedWordsRef.current.clear(); // Clear counted words on new game
@@ -124,7 +126,7 @@ export default function WordRainGame() {
     const interval = setInterval(() => {
       setWords((prev) => {
         // First, update positions
-        const updated = prev.map((w) => ({ ...w, y: w.y + w.speed }));
+        const updated = prev.map((w) => ({ ...w, y: w.y + w.speed * paceMultiplier }));
 
         // Find words that have crossed the threshold AND haven't been counted yet (using ref)
         const newlyFallen = updated.filter(
@@ -157,14 +159,24 @@ export default function WordRainGame() {
     }, 16);
 
     return () => clearInterval(interval);
-  }, [isPlaying, playError, playGameOver]);
+  }, [isPlaying, paceMultiplier, playError, playGameOver]);
 
   // Spawn words
   useEffect(() => {
     if (!isPlaying) return;
-    const interval = setInterval(spawnWord, difficultySettings[difficulty].spawnMs);
+    const spawnDelay = Math.max(550, difficultySettings[difficulty].spawnMs / paceMultiplier);
+    const interval = setInterval(spawnWord, spawnDelay);
     return () => clearInterval(interval);
-  }, [isPlaying, spawnWord, difficulty, difficultySettings]);
+  }, [isPlaying, spawnWord, difficulty, difficultySettings, paceMultiplier]);
+
+  // Gradually increase pace every 30s
+  useEffect(() => {
+    if (!isPlaying) return;
+    const interval = setInterval(() => {
+      setPaceMultiplier((prev) => prev + 0.06);
+    }, 30000);
+    return () => clearInterval(interval);
+  }, [isPlaying]);
 
   // Generate stars on client-side only to avoid hydration mismatch
   useEffect(() => {

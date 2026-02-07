@@ -1,24 +1,26 @@
 "use client";
 
 import Link from "next/link";
+import ThemePicker from "./ThemePicker";
 
 export default function NavBar() {
   return (
-    <nav className="flex items-center justify-between p-4 bg-slate-900/50 backdrop-blur-sm border-b border-slate-800 sticky top-0 z-50">
+    <nav className="sticky top-0 z-50 flex items-center justify-between border-b border-slate-800 bg-slate-900/50 p-4 backdrop-blur-sm">
       <Link
         href="/"
-        className="text-xl font-black tracking-tight text-white flex items-center gap-2"
+        className="flex items-center gap-2 text-xl font-black tracking-tight text-white"
       >
         <span className="text-2xl">🕹️</span> GAMES HUB
       </Link>
 
-      <div className="flex items-center gap-6 text-sm font-medium text-slate-400">
-        <Link href="/games" className="hover:text-white transition-colors">
-          Games
-        </Link>
-        <Link href="/leaderboard" className="hover:text-white transition-colors">
+      <div className="flex items-center gap-4">
+        <Link
+          href="/leaderboard"
+          className="text-sm font-medium text-slate-400 transition-colors hover:text-white"
+        >
           Leaderboard
         </Link>
+        <ThemePicker />
       </div>
     </nav>
   );
