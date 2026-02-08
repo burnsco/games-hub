@@ -4,6 +4,7 @@ import { games } from "./data/games";
 export default function Home() {
   return (
     <main className="relative h-[calc(100dvh-73px)] overflow-hidden">
+      <h1 className="sr-only">Games Hub — Instant Browser Arcade</h1>
       <div className="relative flex h-full items-center px-3 py-3 md:px-4 md:py-4">
         <div className="pointer-events-none fixed left-0 top-0 -z-10 h-full w-full overflow-hidden">
           <div className="absolute left-[-10%] top-[-10%] h-[50%] w-[50%] animate-pulse rounded-full bg-blue-600/10 blur-[120px]" />
@@ -19,6 +20,8 @@ export default function Home() {
               <a
                 key={game.name}
                 href={game.path}
+                aria-label={`Play ${game.name}`}
+                title={`Play ${game.name}`}
                 className="game-card group relative h-full overflow-visible rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm transition-all duration-300 hover:scale-[1.02] hover:border-white/30"
                 style={{ "--glow-color": game.bgGlow } as CSSProperties}
               >
