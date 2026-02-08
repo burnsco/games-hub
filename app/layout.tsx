@@ -16,8 +16,32 @@ const outfit = Outfit({
 });
 
 export const metadata: Metadata = {
-  title: "Game Hub",
-  description: "Pick your challenge.",
+  title: "Games Hub — Instant Browser Arcade",
+  description:
+    "A premium collection of lightweight, instant-play browser games. Zero install, zero friction, just pure fun. Featuring classics like Snake, 2048, and more.",
+  keywords: [
+    "Games Hub",
+    "Browser Games",
+    "Arcade",
+    "Next.js Games",
+    "Snake",
+    "2048",
+    "Brick Breaker",
+    "Online Arcade",
+    "Corey Burns",
+  ],
+  authors: [{ name: "Corey Burns" }],
+  openGraph: {
+    title: "Games Hub — Instant Browser Arcade",
+    description: "Pick your challenge and play instantly in your browser.",
+    type: "website",
+    siteName: "Games Hub",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Games Hub — Instant Browser Arcade",
+    description: "Pick your challenge and play instantly in your browser.",
+  },
 };
 
 export default function RootLayout({
