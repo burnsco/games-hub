@@ -14,7 +14,7 @@ export default function Home() {
           />
         </div>
 
-        <div className="mx-auto h-full w-full max-w-[1440px]">
+        <div className="mx-auto h-full w-full max-w-360">
           <div className="grid h-full grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3 md:grid-cols-4 md:grid-rows-3 md:auto-rows-fr">
             {games.map((game) => (
               <a
@@ -31,7 +31,7 @@ export default function Home() {
                   {game.icon}
                 </div>
 
-                <div className="relative z-10 flex h-full min-h-[110px] flex-col justify-end p-3 md:min-h-[128px] md:p-4">
+                <div className="relative z-10 flex h-full min-h-27.5 flex-col justify-end p-3 md:min-h-32 md:p-4">
                   <h2
                     className={`bg-linear-to-r mb-2 bg-clip-text text-xl font-bold text-transparent md:text-2xl ${game.color}`}
                   >
