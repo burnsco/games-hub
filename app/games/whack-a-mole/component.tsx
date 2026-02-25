@@ -30,10 +30,8 @@ export default function WhackAMoleGame() {
   const scoreRef = useRef(0);
   const bestScoreRef = useRef(bestScore);
   const particleIdRef = useRef(0);
-  // biome-ignore lint/suspicious/noExplicitAny: browser compatibility
-  const timerRef = useRef<any>(null);
-  // biome-ignore lint/suspicious/noExplicitAny: browser compatibility
-  const moleTimerRef = useRef<any>(null);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const moleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const { playSquash, playSelect, playError, playGameOver } = useSoundFX();
 
   // Sync refs
@@ -46,6 +44,14 @@ export default function WhackAMoleGame() {
     setIsClient(true);
     const saved = localStorage.getItem("whackAMoleBestScore");
     if (saved) setBestScore(parseInt(saved, 10));
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      isPlayingRef.current = false;
+      if (timerRef.current) clearInterval(timerRef.current);
+      if (moleTimerRef.current) clearTimeout(moleTimerRef.current);
+    };
   }, []);
 
   const createExplosion = (x: number, y: number) => {
@@ -140,18 +146,16 @@ export default function WhackAMoleGame() {
     if (moleTimerRef.current) clearTimeout(moleTimerRef.current);
     playGameOver();
     setScore((currentScore) => {
-      if (currentScore > bestScore) {
+      if (currentScore > bestScoreRef.current) {
         setBestScore(currentScore);
+        bestScoreRef.current = currentScore;
         localStorage.setItem("whackAMoleBestScore", currentScore.toString());
       }
       return currentScore;
     });
-  }, [bestScore, playGameOver]);
+  }, [playGameOver]);
 
-  const handleWhack = (
-    index: number,
-    e: React.MouseEvent | React.TouchEvent | React.KeyboardEvent,
-  ) => {
+  const handleWhack = (index: number, e: React.MouseEvent | React.TouchEvent) => {
     if (!isPlayingRef.current) return;
 
     if (index === activeMole) {
@@ -163,15 +167,19 @@ export default function WhackAMoleGame() {
 
       if (newScore > bestScoreRef.current) {
         setBestScore(newScore);
+        bestScoreRef.current = newScore;
         localStorage.setItem("whackAMoleBestScore", newScore.toString());
       }
 
       // Get click position for explosion
-      // biome-ignore lint/suspicious/noExplicitAny: event type compatibility
-      const clientX = "touches" in e ? (e as any).touches[0].clientX : (e as any).clientX;
-      // biome-ignore lint/suspicious/noExplicitAny: event type compatibility
-      const clientY = "touches" in e ? (e as any).touches[0].clientY : (e as any).clientY;
-      createExplosion(clientX || 0, clientY || 0);
+      if ("touches" in e) {
+        const touch = e.touches[0];
+        if (touch) {
+          createExplosion(touch.clientX, touch.clientY);
+        }
+      } else {
+        createExplosion(e.clientX, e.clientY);
+      }
 
       // Immediately spawn next to keep momentum
       if (moleTimerRef.current) clearTimeout(moleTimerRef.current);

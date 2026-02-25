@@ -30,11 +30,16 @@ export default function SnakeGame() {
   const [gameOver, setGameOver] = useState(false);
   const [gameSpeed, setGameSpeed] = useState(150);
   const directionRef = useRef(direction);
+  const bestScoreRef = useRef(bestScore);
   const { playEat, playHit, playSelect, playGameOver } = useSoundFX();
 
   useEffect(() => {
     directionRef.current = direction;
   }, [direction]);
+
+  useEffect(() => {
+    bestScoreRef.current = bestScore;
+  }, [bestScore]);
 
   const spawnFood = useCallback((currentSnake: Point[]) => {
     let newFood: Point;
@@ -74,6 +79,7 @@ export default function SnakeGame() {
           x: prevSnake[0].x + directionRef.current.x,
           y: prevSnake[0].y + directionRef.current.y,
         };
+        const willEat = head.x === food.x && head.y === food.y;
 
         // Wall collision
         if (head.x < 0 || head.x >= GRID_SIZE || head.y < 0 || head.y >= GRID_SIZE) {
@@ -84,8 +90,9 @@ export default function SnakeGame() {
           return prevSnake;
         }
 
-        // Self collision
-        if (prevSnake.some((s) => s.x === head.x && s.y === head.y)) {
+        // Self collision (moving into the current tail cell is valid unless we're growing)
+        const collisionBody = willEat ? prevSnake : prevSnake.slice(0, -1);
+        if (collisionBody.some((s) => s.x === head.x && s.y === head.y)) {
           setIsPlaying(false);
           setGameOver(true);
           playHit();
@@ -96,11 +103,12 @@ export default function SnakeGame() {
         const newSnake = [head, ...prevSnake];
 
         // Food collision
-        if (head.x === food.x && head.y === food.y) {
+        if (willEat) {
           setScore((s) => {
             const newScore = s + 10;
-            if (newScore > bestScore) {
+            if (newScore > bestScoreRef.current) {
               setBestScore(newScore);
+              bestScoreRef.current = newScore;
               localStorage.setItem("snakeBestScore", newScore.toString());
             }
             return newScore;
@@ -117,7 +125,7 @@ export default function SnakeGame() {
     }, gameSpeed);
 
     return () => clearInterval(interval);
-  }, [isPlaying, food, gameSpeed, bestScore, spawnFood, playEat, playHit, playGameOver]);
+  }, [isPlaying, food, gameSpeed, spawnFood, playEat, playHit, playGameOver]);
 
   // Controls
   useEffect(() => {

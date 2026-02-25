@@ -17,8 +17,18 @@ export default function PongGame() {
   const [aiScore, setAiScore] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [result, setResult] = useState<"win" | "lose" | null>(null);
+  const playerYRef = useRef(playerY);
+  const aiYRef = useRef(aiY);
   const keysRef = useRef<{ [key: string]: boolean }>({});
   const { playBlip, playScore, playError, playGameOver, playSelect } = useSoundFX();
+
+  useEffect(() => {
+    playerYRef.current = playerY;
+  }, [playerY]);
+
+  useEffect(() => {
+    aiYRef.current = aiY;
+  }, [aiY]);
 
   const resetBall = useCallback(
     () => ({
@@ -31,8 +41,11 @@ export default function PongGame() {
   );
 
   const startGame = () => {
-    setPlayerY(200 - PADDLE_HEIGHT / 2);
-    setAiY(200 - PADDLE_HEIGHT / 2);
+    const startY = 200 - PADDLE_HEIGHT / 2;
+    setPlayerY(startY);
+    setAiY(startY);
+    playerYRef.current = startY;
+    aiYRef.current = startY;
     setBall(resetBall());
     setPlayerScore(0);
     setAiScore(0);
@@ -67,10 +80,18 @@ export default function PongGame() {
 
       // Player movement
       if (keysRef.current.ArrowUp || keysRef.current.w || keysRef.current.W) {
-        setPlayerY((y) => Math.max(0, y - 8));
+        setPlayerY((y) => {
+          const next = Math.max(0, y - 8);
+          playerYRef.current = next;
+          return next;
+        });
       }
       if (keysRef.current.ArrowDown || keysRef.current.s || keysRef.current.S) {
-        setPlayerY((y) => Math.min(canvas.height - PADDLE_HEIGHT, y + 8));
+        setPlayerY((y) => {
+          const next = Math.min(canvas.height - PADDLE_HEIGHT, y + 8);
+          playerYRef.current = next;
+          return next;
+        });
       }
 
       setBall((prevBall) => {
@@ -82,9 +103,18 @@ export default function PongGame() {
         setAiY((y) => {
           const aiCenter = y + PADDLE_HEIGHT / 2;
           if (newBall.x > canvas.width / 2) {
-            if (aiCenter < newBall.y - 20) return Math.min(canvas.height - PADDLE_HEIGHT, y + 4);
-            if (aiCenter > newBall.y + 20) return Math.max(0, y - 4);
+            if (aiCenter < newBall.y - 20) {
+              const next = Math.min(canvas.height - PADDLE_HEIGHT, y + 4);
+              aiYRef.current = next;
+              return next;
+            }
+            if (aiCenter > newBall.y + 20) {
+              const next = Math.max(0, y - 4);
+              aiYRef.current = next;
+              return next;
+            }
           }
+          aiYRef.current = y;
           return y;
         });
 
@@ -97,22 +127,22 @@ export default function PongGame() {
         // Player paddle collision
         if (
           newBall.x - BALL_SIZE <= 30 &&
-          newBall.y >= playerY &&
-          newBall.y <= playerY + PADDLE_HEIGHT
+          newBall.y >= playerYRef.current &&
+          newBall.y <= playerYRef.current + PADDLE_HEIGHT
         ) {
           newBall.speedX = Math.abs(newBall.speedX) * 1.05;
-          newBall.speedY += (newBall.y - (playerY + PADDLE_HEIGHT / 2)) * 0.1;
+          newBall.speedY += (newBall.y - (playerYRef.current + PADDLE_HEIGHT / 2)) * 0.1;
           playBlip(440);
         }
 
         // AI paddle collision
         if (
           newBall.x + BALL_SIZE >= canvas.width - 30 &&
-          newBall.y >= aiY &&
-          newBall.y <= aiY + PADDLE_HEIGHT
+          newBall.y >= aiYRef.current &&
+          newBall.y <= aiYRef.current + PADDLE_HEIGHT
         ) {
           newBall.speedX = -Math.abs(newBall.speedX) * 1.05;
-          newBall.speedY += (newBall.y - (aiY + PADDLE_HEIGHT / 2)) * 0.1;
+          newBall.speedY += (newBall.y - (aiYRef.current + PADDLE_HEIGHT / 2)) * 0.1;
           playBlip(330);
         }
 
@@ -151,7 +181,7 @@ export default function PongGame() {
     }, 16);
 
     return () => clearInterval(interval);
-  }, [isPlaying, playerY, aiY, resetBall, playBlip, playScore, playError, playGameOver]);
+  }, [isPlaying, resetBall, playBlip, playScore, playError, playGameOver]);
 
   // Draw
   useEffect(() => {

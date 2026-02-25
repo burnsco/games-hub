@@ -2,14 +2,18 @@
 
 import { useCallback, useRef } from "react";
 
+type LegacyAudioWindow = Window &
+  typeof globalThis & {
+    webkitAudioContext?: typeof AudioContext;
+  };
+
 export const useSoundFX = () => {
   const audioCtxRef = useRef<AudioContext | null>(null);
 
   const getAudioContext = useCallback(() => {
     if (!audioCtxRef.current) {
-      const AudioContextClass =
-        // biome-ignore lint/suspicious/noExplicitAny: explicit any used to bypass environment-specific typescript/browser API detection issues
-        (window as any).AudioContext || (window as any).webkitAudioContext;
+      const audioWindow = window as LegacyAudioWindow;
+      const AudioContextClass = audioWindow.AudioContext || audioWindow.webkitAudioContext;
       if (AudioContextClass) {
         audioCtxRef.current = new AudioContextClass();
       }

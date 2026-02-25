@@ -92,6 +92,7 @@ export default function TetrisGame() {
   const dropIntervalRef = useRef(1000);
   const scoreRef = useRef(0);
   const levelRef = useRef(1);
+  const highScoreRef = useRef(0);
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [isMuted, setIsMuted] = useState(false);
@@ -101,8 +102,16 @@ export default function TetrisGame() {
   useEffect(() => {
     setIsClient(true);
     const saved = localStorage.getItem("tetrisHighScore");
-    if (saved) setHighScore(parseInt(saved, 10));
+    if (saved) {
+      const parsed = parseInt(saved, 10);
+      setHighScore(parsed);
+      highScoreRef.current = parsed;
+    }
   }, []);
+
+  useEffect(() => {
+    highScoreRef.current = highScore;
+  }, [highScore]);
 
   const resetGame = useCallback(() => {
     setGrid(createGrid());
@@ -231,7 +240,7 @@ export default function TetrisGame() {
     (newGrid: Grid) => {
       let rowsCleared = 0;
       const sweptGrid = newGrid.reduce((ack, row) => {
-        if (row.findIndex((cell) => cell === 0) === -1) {
+        if (row.indexOf(0) === -1) {
           rowsCleared += 1;
           ack.unshift(Array(COLS).fill(0));
           return ack;
@@ -241,27 +250,28 @@ export default function TetrisGame() {
       }, [] as Grid);
 
       if (rowsCleared > 0) {
-        const points = [0, 100, 300, 500, 800][rowsCleared] * level;
+        const points = [0, 100, 300, 500, 800][rowsCleared] * levelRef.current;
         setScore((prev) => {
           const newScore = prev + points;
-          if (newScore > highScore) {
+          if (newScore > highScoreRef.current) {
             setHighScore(newScore);
+            highScoreRef.current = newScore;
             localStorage.setItem("tetrisHighScore", newScore.toString());
           }
           scoreRef.current = newScore;
+          const nextLevel = Math.floor(newScore / 1000) + 1;
+          if (nextLevel !== levelRef.current) {
+            setLevel(nextLevel);
+            levelRef.current = nextLevel;
+          }
+          dropIntervalRef.current = Math.max(100, 1000 - (nextLevel - 1) * 80);
           return newScore;
         });
-        setLevel((prev) => {
-          const newLevel = prev + Math.floor(rowsCleared * 0.1);
-          levelRef.current = newLevel;
-          return newLevel;
-        }); // Simple leveling
-        dropIntervalRef.current = Math.max(100, 1000 - level * 50);
         soundFX.playScore();
       }
       return sweptGrid;
     },
-    [level, highScore, soundFX],
+    [soundFX],
   );
 
   const drop = useCallback(() => {
@@ -292,14 +302,6 @@ export default function TetrisGame() {
         }
 
         return;
-      }
-
-      // Stop music on game over
-      if (activePieceRef.current.pos.y < 1) {
-        if (audioRef.current) {
-          audioRef.current.pause();
-          audioRef.current.currentTime = 0;
-        }
       }
 
       const newGrid = [...gridRef.current];
@@ -548,7 +550,6 @@ export default function TetrisGame() {
       </div>
 
       {/* Audio Element */}
-      {/* biome-ignore lint/a11y/useMediaCaption: Music track */}
       <audio ref={audioRef} src="/tetris-music.mp3" loop muted={isMuted} />
     </div>
   );

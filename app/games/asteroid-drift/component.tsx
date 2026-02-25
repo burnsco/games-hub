@@ -204,14 +204,14 @@ export default function AsteroidDriftGame() {
         const ship = shipRef.current;
 
         // Ship Controls
-        if (ship && ship.active) {
-          if (keysRef.current["ArrowLeft"] || keysRef.current["a"]) {
+        if (ship?.active) {
+          if (keysRef.current.ArrowLeft || keysRef.current.a) {
             ship.rotation -= ROTATION_SPEED;
           }
-          if (keysRef.current["ArrowRight"] || keysRef.current["d"]) {
+          if (keysRef.current.ArrowRight || keysRef.current.d) {
             ship.rotation += ROTATION_SPEED;
           }
-          if (keysRef.current["ArrowUp"] || keysRef.current["w"]) {
+          if (keysRef.current.ArrowUp || keysRef.current.w) {
             ship.thrusting = true;
             ship.velocity.x += Math.cos(ship.rotation) * THRUST;
             ship.velocity.y += Math.sin(ship.rotation) * THRUST;
@@ -345,7 +345,7 @@ export default function AsteroidDriftGame() {
         asteroidsRef.current = asteroidsRef.current.filter((a) => a.active);
 
         // Ship - Asteroid
-        if (ship && ship.active && ship.invulnerable === 0) {
+        if (ship?.active && ship.invulnerable === 0) {
           asteroidsRef.current.forEach((asteroid) => {
             if (!asteroid.active) return;
             const dist = Math.hypot(ship.x - asteroid.x, ship.y - asteroid.y);
@@ -400,11 +400,7 @@ export default function AsteroidDriftGame() {
 
       // Draw Ship
       const ship = shipRef.current;
-      if (
-        ship &&
-        ship.active &&
-        (ship.invulnerable === 0 || Math.floor(Date.now() / 100) % 2 === 0)
-      ) {
+      if (ship?.active && (ship.invulnerable === 0 || Math.floor(Date.now() / 100) % 2 === 0)) {
         ctx.save();
         ctx.translate(ship.x, ship.y);
         ctx.rotate(ship.rotation);
