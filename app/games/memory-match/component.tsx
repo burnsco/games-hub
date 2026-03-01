@@ -36,9 +36,9 @@ const DIFFICULTY_CONFIG: Record<
   Difficulty,
   { label: string; pairs: number; cols: number; chances: number }
 > = {
-  easy: { label: "Easy", pairs: 8, cols: 4, chances: 6 },
-  medium: { label: "Medium", pairs: 10, cols: 5, chances: 7 },
-  hard: { label: "Hard", pairs: 12, cols: 6, chances: 8 },
+  easy: { label: "Easy", pairs: 8, cols: 4, chances: 7 },
+  medium: { label: "Medium", pairs: 10, cols: 5, chances: 8 },
+  hard: { label: "Hard", pairs: 12, cols: 6, chances: 9 },
 };
 
 const shuffle = <T,>(array: T[]): T[] => {
