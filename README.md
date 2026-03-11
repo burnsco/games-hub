@@ -1,52 +1,29 @@
-# Games Hub — Instant Browser Arcade
+# Games Hub
 
-A premium collection of lightweight, instant-play browser games built with **Next.js 15** and **React 19**. Games Hub provides a clean, ad-free environment for quick gaming sessions with zero install friction.
+Games Hub is a browser arcade built with Next.js. It collects lightweight casual games behind a fast, no-account, instant-play interface.
 
-## 🎮 The Arcade
+## Highlights
 
-Games Hub features a diverse collection of classic and original games:
+- Multiple small games in one app
+- Responsive layout for desktop and mobile play
+- Lightweight UI built for quick session starts
 
-- 🐍 **Snake**: The timeless classic.
-- 🧱 **Brick Breaker**: Shatter the blocks.
-- 🧩 **2048 Lite**: Geometric puzzle fun.
-- 🕹️ **Asteroid Drift**: Navigate the cosmos.
-- 🎯 **Bug Squash**: High-speed reaction test.
-- 🃏 **Memory Match**: Train your brain.
-- 🏓 **Pong**: The ultimate minimalist challenge.
-- ...and many more!
+## Stack
 
-## ✨ Features
+- Next.js
+- React
+- TypeScript
 
-- ⚡ **Instant Play**: No downloads, no accounts, just click and play.
-- 🎨 **Minimalist UI**: Clean, focus-driven design built with Tailwind CSS.
-- 📱 **Responsive**: Play on your desktop, tablet, or phone.
-- 🚀 **Performant**: Built with Next.js App Router and optimized for speed.
-- 🛡️ **Ad-Free**: A pure gaming experience without interruptions.
-
-## 🛠️ Tech Stack
-
-- **Framework**: Next.js 15 (App Router)
-- **UI & Logic**: React 19, TypeScript
-- **Styling**: Tailwind CSS 4
-- **Deployment**: Cloudflare Workers via OpenNext
-
-## 🚀 Getting Started
+## Quick start
 
 ```bash
-# Install dependencies
 bun install
-
-# Start development server
 bun run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) to start playing.
-
-## 📦 Deployment
-
-Optimized for Cloudflare Workers:
+Build and deploy:
 
 ```bash
+bun run build
 bun run build:worker
-bun run deploy
 ```
