@@ -9,7 +9,7 @@
     "deploy": "wrangler deploy",
     "start": "next start",
     "lint": "oxlint",
-    "lint:fix": "biome check --write .",
+    "lint:fix": "oxlint --fix . && oxfmt",
     "format": "oxfmt",
     "format:fix": "biome format --write .",
     "check": "biome check --write .",
@@ -28,11 +28,11 @@
     "@types/react-dom": "^19.2.3",
     "husky": "^9.1.7",
     "lint-staged": "^16.3.3",
+    "oxfmt": "^0.37.0",
+    "oxlint": "^1.53.0",
     "tailwindcss": "^4.2.1",
     "typescript": "^5.9.3",
-    "wrangler": "^4.71.0",
-    "oxlint": "^1.52.0",
-    "oxfmt": "^0.37.0"
+    "wrangler": "^4.72.0"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
