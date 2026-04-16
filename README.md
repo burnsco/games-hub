@@ -1,6 +1,6 @@
 # Games Hub
 
-Games Hub is a browser arcade built with Next.js. It collects lightweight casual games behind a fast, no-account, instant-play interface.
+Games Hub is a browser arcade built with Vite and React. It collects lightweight casual games behind a fast, no-account, instant-play interface.
 
 ## Highlights
 
@@ -10,9 +10,10 @@ Games Hub is a browser arcade built with Next.js. It collects lightweight casual
 
 ## Stack
 
-- Next.js
+- Vite
 - React
 - TypeScript
+- React Router
 
 ## Quick start
 
@@ -25,5 +26,5 @@ Build and deploy:
 
 ```bash
 bun run build
-bun run build:worker
+bun run deploy
 ```
