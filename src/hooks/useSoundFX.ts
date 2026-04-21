@@ -1,14 +1,19 @@
-import { useCallback, useRef } from "react";
+import { useCallback, useMemo, useRef } from "react";
 
 type LegacyAudioWindow = Window &
   typeof globalThis & {
     webkitAudioContext?: typeof AudioContext;
   };
 
+export const MUTE_KEY = "gamesMuted";
+
+export const isMuted = () => localStorage.getItem(MUTE_KEY) === "true";
+
 export const useSoundFX = () => {
   const audioCtxRef = useRef<AudioContext | null>(null);
 
   const getAudioContext = useCallback(() => {
+    if (isMuted()) return null;
     if (!audioCtxRef.current) {
       const audioWindow = window as LegacyAudioWindow;
       const AudioContextClass = audioWindow.AudioContext || audioWindow.webkitAudioContext;
@@ -244,16 +249,30 @@ export const useSoundFX = () => {
     osc.stop(ctx.currentTime + 0.2);
   }, [getAudioContext]);
 
-  return {
-    playJump,
-    playScore,
-    playHit,
-    playGameOver,
-    playMatch,
-    playEat,
-    playSquash,
-    playBlip,
-    playSelect,
-    playError,
-  };
+  return useMemo(
+    () => ({
+      playJump,
+      playScore,
+      playHit,
+      playGameOver,
+      playMatch,
+      playEat,
+      playSquash,
+      playBlip,
+      playSelect,
+      playError,
+    }),
+    [
+      playJump,
+      playScore,
+      playHit,
+      playGameOver,
+      playMatch,
+      playEat,
+      playSquash,
+      playBlip,
+      playSelect,
+      playError,
+    ],
+  );
 };

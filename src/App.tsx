@@ -1,5 +1,6 @@
 import { Route, Routes } from "react-router-dom";
 import RootLayout from "./RootLayout";
+import ErrorBoundary from "./components/ErrorBoundary";
 import HomePage from "./pages/HomePage";
 import BugSquashPage from "./games/bug-squash/page";
 import WordRainPage from "./games/word-rain/page";
@@ -22,19 +23,28 @@ export default function App() {
       <Route element={<RootLayout />}>
         <Route path="/" element={<HomePage />} />
         <Route path="/leaderboard" element={<LeaderboardPage />} />
-        <Route path="/games/bug-squash" element={<BugSquashPage />} />
-        <Route path="/games/word-rain" element={<WordRainPage />} />
-        <Route path="/games/memory-match" element={<MemoryMatchPage />} />
-        <Route path="/games/snake" element={<SnakePage />} />
-        <Route path="/games/pong" element={<PongPage />} />
-        <Route path="/games/hangman" element={<HangmanPage />} />
-        <Route path="/games/brick-breaker" element={<BrickBreakerPage />} />
-        <Route path="/games/asteroid-drift" element={<AsteroidDriftPage />} />
-        <Route path="/games/color-switch" element={<ColorSwitchPage />} />
-        <Route path="/games/tetris" element={<TetrisPage />} />
-        <Route path="/games/whack-a-mole" element={<WhackAMolePage />} />
-        <Route path="/games/stack-towers" element={<StackTowersPage />} />
-        <Route path="/games/coins-dice" element={<CoinsDicePage />} />
+        <Route
+          path="/games/*"
+          element={
+            <ErrorBoundary>
+              <Routes>
+                <Route path="bug-squash" element={<BugSquashPage />} />
+                <Route path="word-rain" element={<WordRainPage />} />
+                <Route path="memory-match" element={<MemoryMatchPage />} />
+                <Route path="snake" element={<SnakePage />} />
+                <Route path="pong" element={<PongPage />} />
+                <Route path="hangman" element={<HangmanPage />} />
+                <Route path="brick-breaker" element={<BrickBreakerPage />} />
+                <Route path="asteroid-drift" element={<AsteroidDriftPage />} />
+                <Route path="color-switch" element={<ColorSwitchPage />} />
+                <Route path="tetris" element={<TetrisPage />} />
+                <Route path="whack-a-mole" element={<WhackAMolePage />} />
+                <Route path="stack-towers" element={<StackTowersPage />} />
+                <Route path="coins-dice" element={<CoinsDicePage />} />
+              </Routes>
+            </ErrorBoundary>
+          }
+        />
       </Route>
     </Routes>
   );

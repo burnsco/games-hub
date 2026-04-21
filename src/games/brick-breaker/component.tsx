@@ -47,23 +47,12 @@ export default function BrickBreakerGame() {
   const [isPaused, setIsPaused] = useState(false);
   const [gameOver, setGameOver] = useState(false);
   const [gameWon, setGameWon] = useState(false);
-  const [bestScore, setBestScore] = useState(0);
-  const [isClient, setIsClient] = useState(false);
+  const [bestScore, setBestScore] = useState(() => {
+    const saved = localStorage.getItem("brickBreakerBestScore");
+    return saved ? parseInt(saved, 10) : 0;
+  });
 
   const soundFX = useSoundFX();
-  const soundFXRef = useRef(soundFX);
-
-  // Update soundFXRef whenever soundFX changes to keep it stable for the loop
-  useEffect(() => {
-    soundFXRef.current = soundFX;
-  }, [soundFX]);
-
-  // Handle hydration and load best score
-  useEffect(() => {
-    setIsClient(true);
-    const saved = localStorage.getItem("brickBreakerBestScore");
-    if (saved) setBestScore(parseInt(saved, 10));
-  }, []);
 
   // Game state refs for stable loop
   const isPlayingRef = useRef(false);
@@ -143,7 +132,7 @@ export default function BrickBreakerGame() {
     setIsPlayingVisible(true);
     initGame();
     isPlayingRef.current = true;
-    soundFXRef.current.playSelect();
+    soundFX.playSelect();
   };
 
   const pauseGame = () => {
@@ -203,11 +192,11 @@ export default function BrickBreakerGame() {
         // Wall collisions
         if (ball.x + BALL_RADIUS > canvas.width || ball.x - BALL_RADIUS < 0) {
           ball.dx = -ball.dx;
-          soundFXRef.current.playBlip(300);
+          soundFX.playBlip(300);
         }
         if (ball.y - BALL_RADIUS < 0) {
           ball.dy = -ball.dy;
-          soundFXRef.current.playBlip(300);
+          soundFX.playBlip(300);
         }
 
         // Paddle collision
@@ -219,7 +208,7 @@ export default function BrickBreakerGame() {
           const hitPos = (ball.x - (paddleXRef.current + PADDLE_WIDTH / 2)) / (PADDLE_WIDTH / 2);
           ball.dx = hitPos * 5;
           ball.dy = -Math.abs(ball.dy);
-          soundFXRef.current.playBlip(440);
+          soundFX.playBlip(440);
         }
 
         // Brick collision
@@ -243,7 +232,7 @@ export default function BrickBreakerGame() {
                 localStorage.setItem("brickBreakerBestScore", newScore.toString());
               }
 
-              soundFXRef.current.playScore();
+              soundFX.playScore();
               createExplosion(brick.x + brick.width / 2, brick.y + brick.height / 2, brick.color);
 
               if (bricksRef.current.every((b) => !b.active)) {
@@ -252,7 +241,7 @@ export default function BrickBreakerGame() {
                 isPausedRef.current = false;
                 setIsPlayingVisible(false);
                 setGameWon(true);
-                soundFXRef.current.playMatch();
+                soundFX.playMatch();
               }
             }
           }
@@ -270,19 +259,18 @@ export default function BrickBreakerGame() {
             isPausedRef.current = false;
             setIsPlayingVisible(false);
             setGameOver(true);
-            soundFXRef.current.playGameOver();
+            soundFX.playGameOver();
           } else {
             ball.x = canvas.width / 2;
             ball.y = canvas.height - 40;
             ball.dx = INITIAL_BALL_SPEED * (Math.random() > 0.5 ? 1 : -1);
             ball.dy = -INITIAL_BALL_SPEED;
-            soundFXRef.current.playHit();
+            soundFX.playHit();
           }
         }
       }
 
       // 4. DRAW
-      // Bricks - Optimize by removing shadowBlur from loop
       bricksRef.current.forEach((brick) => {
         if (brick.active) {
           ctx.fillStyle = brick.color;
@@ -325,15 +313,28 @@ export default function BrickBreakerGame() {
 
     frameId = requestAnimationFrame(render);
     return () => cancelAnimationFrame(frameId);
-  }, []);
+  }, [soundFX]);
 
   // Controls
   useEffect(() => {
+    const canvas = canvasRef.current;
+
     const handleMouseMove = (e: MouseEvent) => {
-      const canvas = canvasRef.current;
       if (!canvas) return;
       const rect = canvas.getBoundingClientRect();
-      const relativeX = e.clientX - rect.left;
+      const scaleX = canvas.width / rect.width;
+      const relativeX = (e.clientX - rect.left) * scaleX;
+      if (relativeX > 0 && relativeX < canvas.width) {
+        paddleXRef.current = relativeX - PADDLE_WIDTH / 2;
+      }
+    };
+
+    const handleTouchMove = (e: TouchEvent) => {
+      if (!canvas) return;
+      e.preventDefault();
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = canvas.width / rect.width;
+      const relativeX = (e.touches[0].clientX - rect.left) * scaleX;
       if (relativeX > 0 && relativeX < canvas.width) {
         paddleXRef.current = relativeX - PADDLE_WIDTH / 2;
       }
@@ -343,7 +344,6 @@ export default function BrickBreakerGame() {
       if (e.key === "ArrowLeft" || e.key === "a") paddleXRef.current -= 20;
       if (e.key === "ArrowRight" || e.key === "d") paddleXRef.current += 20;
 
-      const canvas = canvasRef.current;
       if (canvas) {
         paddleXRef.current = Math.max(0, Math.min(canvas.width - PADDLE_WIDTH, paddleXRef.current));
       }
@@ -351,9 +351,11 @@ export default function BrickBreakerGame() {
 
     window.addEventListener("mousemove", handleMouseMove);
     window.addEventListener("keydown", handleKeyDown);
+    canvas?.addEventListener("touchmove", handleTouchMove, { passive: false });
     return () => {
       window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("keydown", handleKeyDown);
+      canvas?.removeEventListener("touchmove", handleTouchMove);
     };
   }, []);
 
@@ -383,7 +385,7 @@ export default function BrickBreakerGame() {
             <div className="text-xs uppercase tracking-widest text-slate-400">Lives</div>
           </div>
           <div className="rounded-xl border border-white/10 bg-white/5 p-3">
-            <div className="text-3xl font-bold text-slate-300">{isClient ? bestScore : 0}</div>
+            <div className="text-3xl font-bold text-slate-300">{bestScore}</div>
             <div className="text-xs uppercase tracking-widest text-slate-400">Best</div>
           </div>
           <Link
@@ -414,7 +416,7 @@ export default function BrickBreakerGame() {
             <div className="text-xs uppercase tracking-widest text-slate-400">Lives</div>
           </div>
           <div className="rounded-xl border border-white/10 bg-black/20 p-3">
-            <div className="text-4xl font-bold text-slate-300">{isClient ? bestScore : 0}</div>
+            <div className="text-4xl font-bold text-slate-300">{bestScore}</div>
             <div className="text-xs uppercase tracking-widest text-slate-400">Best</div>
           </div>
           <p className="text-xs text-slate-400">Use side lanes to arc the ball above the stack.</p>
@@ -431,11 +433,11 @@ export default function BrickBreakerGame() {
             ref={canvasRef}
             width={BRICK_BREAKER_CONFIG.canvasWidth}
             height={BRICK_BREAKER_CONFIG.canvasHeight}
-            className="mx-auto h-auto w-full max-w-[980px] rounded-2xl border-4 border-cyan-500/30 bg-black/40 shadow-2xl"
+            className="mx-auto h-auto w-full max-w-[980px] rounded-2xl border-4 border-cyan-500/30 bg-black/40 shadow-2xl touch-none"
           />
 
           <p className="mt-3 text-sm text-slate-500 lg:hidden">
-            Use Mouse or Arrows to move paddle
+            Drag on the canvas or use Arrows to move paddle
           </p>
 
           {!gameOver && !gameWon && (
