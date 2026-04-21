@@ -12,18 +12,18 @@
     "lint": "oxlint",
     "lint:fix": "oxlint --fix . && oxfmt",
     "format": "oxfmt",
-    "format:fix": "biome format --write .",
-    "check": "biome check --write .",
+    "format:check": "oxfmt --check .",
+    "check": "bun run lint && bun run format:check",
     "prepare": "husky"
   },
   "dependencies": {
     "react": "^19.2.5",
     "react-dom": "^19.2.5",
     "react-helmet-async": "^3.0.0",
-    "react-router-dom": "^7.14.1"
+    "react-router-dom": "^7.14.2"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4.2.2",
+    "@tailwindcss/postcss": "^4.2.4",
     "@types/node": "^25.6.0",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
@@ -32,14 +32,23 @@
     "lint-staged": "^16.4.0",
     "oxfmt": "^0.46.0",
     "oxlint": "^1.61.0",
-    "tailwindcss": "^4.2.2",
+    "tailwindcss": "^4.2.4",
     "typescript": "^6.0.3",
     "vite": "^8.0.9",
-    "wrangler": "^4.84.0"
+    "wrangler": "^4.84.1"
   },
   "lint-staged": {
-    "*.{js,jsx,ts,tsx}": ["oxlint --fix", "oxfmt"]
+    "*.{js,jsx,ts,tsx}": [
+      "oxlint --fix",
+      "oxfmt"
+    ]
   },
-  "ignoreScripts": ["sharp", "unrs-resolver"],
-  "trustedDependencies": ["sharp", "unrs-resolver"]
+  "ignoreScripts": [
+    "sharp",
+    "unrs-resolver"
+  ],
+  "trustedDependencies": [
+    "sharp",
+    "unrs-resolver"
+  ]
 }
